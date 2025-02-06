@@ -14,4 +14,4 @@ order: 4
 💬 I speak English & French - feel free to reach out!  
 
 🌍 Connect with Me:
-📌 [Twitter](https://twitter.com/nickkovalsky) | 💼 [GitHub](https://github.com/taublast) | 🎯 [Stack Overflow](https://stackoverflow.com/users/7149454/nick-kovalsky)
+📌 [Twitter](https://twitter.com/nickkovalsky) | 💼 [GitHub](https://github.com/taublast) | 🎯 [Stack Overflow](https://stackoverflow.com/users/7149454/nick-kovalsky) | 🔗 [LinkedIn](https://www.linkedin.com/in/nick-kovalsky-92a770174/)
