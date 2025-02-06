@@ -4,11 +4,14 @@ icon: fas fa-info-circle
 order: 4
 ---
 
-> Hi, I'm Nick Kovalsky, a .NET fullstack Xamarin/MAUI developer, in freelance since 2018.   
-> Started programming when I was 10 years old and fell in love with it.  
-> Providing clients with API + Project Administration Panel + mobile apps + web hosting.  
-> I speak English and French, feel free to contact me.
+🚀 Hi, I'm Nick Kovalsky!
+.NET Full-Stack Developer | Xamarin & MAUI Specialist | Freelancer since 2018
 
-* [https://twitter.com/nickkovalsky](https://twitter.com/nickkovalsky)  
-* [https://github.com/taublast](https://github.com/taublast)  
-* [https://stackoverflow.com/users/7149454/nick-kovalsky](https://stackoverflow.com/users/7149454/nick-kovalsky)
+👨‍💻 I started programming at 10 years old and never stopped.
+💡 Passionate about building high-performance mobile & backend solutions.
+🔧 Delivering APIs, Admin Panels, Mobile Apps, and Web Hosting for clients worldwide.
+
+💬 I speak English & French - feel free to reach out!
+
+🌍 Connect with Me:
+📌 [Twitter](https://twitter.com/nickkovalsky) | 💼 [GitHub](https://github.com/taublast) | 🎯 [Stack Overflow](https://stackoverflow.com/users/7149454/nick-kovalsky)
