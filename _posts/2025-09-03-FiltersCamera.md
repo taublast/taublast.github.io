@@ -16,7 +16,7 @@ If you've been following my previous articles you might recall that a `SkiaCamer
 
 [SkiaCamera](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera) provides camera preview that seamlessly integrates with DrawnUI's hardware-accelerated visual effects system, allowing you to do whatever you please with live camera feed and to process still captured photos with all the power of [SkiaSharp](https://github.com/mono/SkiaSharp).
 
-<img src="../assets/img/drawn.jpg" width="350" alt="Paint Shader"
+<img src="../assets/img/kodak.jpg" width="350" alt="Paint Shader"
 style="margin-top: 16px;" />
 
 It looks perfect for any camera data processing, from sending cropped thumbnails to ML/AI to displaying previews in any imaginable way, including any drawn UI around. We will use it for creating that nice combination of Skia SKSL shaders with camera feed.
@@ -119,10 +119,11 @@ For future works I'm thinking to add the selected filter name into some of the a
 
 I have created all of the shaders used in the app with the help of LLMs. Interestingly Claude Sonnet 4 was able to really replicate the specifics of several well known black and white films, what was confirmed by professional photographers. I didn't put exact film names into effects titles though not to overwhelm an average user.
 
-<img src="../assets/img/car.jpg" width="350" alt="Sin City Shader"
-style="margin-top: 16px;" />
+Some complex shaders required several days of work and tuning, like
+those that create "drawn" effects.
 
-*Sin City shader, enhancing all red tones and making everything else ink black and white, creating a specific mood.*
+<img src="../assets/img/drawn.jpg" width="350" alt="Paint Shader"
+style="margin-top: 16px;" />
 
 If you dig inside included shaders code you would see a base for combining reusable functions across different shaders. For example few of them apply a zoom lens effect: in theory our app could apply them to every shader, we could let users select a lens to be applied on top of any of color effects. 
 
