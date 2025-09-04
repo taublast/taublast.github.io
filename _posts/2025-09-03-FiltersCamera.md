@@ -119,11 +119,10 @@ For future works I'm thinking to add the selected filter name into some of the a
 
 I have created all of the shaders used in the app with the help of LLMs. Interestingly Claude Sonnet 4 was able to really replicate the specifics of several well known black and white films, what was confirmed by professional photographers. I didn't put exact film names into effects titles though not to overwhelm an average user.
 
-Some complex shaders required several days of work and tuning, like
-those that create "drawn" effects.
-
-<img src="../assets/img/bd.jpg" width="350" alt="Sketch Shader"
+<img src="../assets/img/car.jpg" width="350" alt="Sin City Shader"
 style="margin-top: 16px;" />
+
+*Batman Sin Cityhader, enhancing all red tones and making everything elase ink black and white.*
 
 If you dig inside included shaders code you would see a base for combining reusable functions across different shaders. For example few of them apply a zoom lens effect: in theory our app could apply them to every shader, we could let users select a lens to be applied on top of any of color effects. 
 
