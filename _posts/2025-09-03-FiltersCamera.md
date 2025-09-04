@@ -29,7 +29,7 @@ Along with the app we will discuss you could also see another `SkiaCamera` usage
 
 Since I had a lot of fun [playing with SKSL shaders previously](https://github.com/taublast/ShadersCarousel) I definitely had to try them with the drawn camera feed! Would it lag? Can Skia render a fluid video flow with shaders applied?
 
-SkiaSharp running with hardware acceleration did indeed provide smooth rendering, performance was tested first on Debug with mid-range Android phones. And even on low-range devices the FPS is fine in Release builds.
+SkiaSharp running with hardware acceleration did indeed provide smooth rendering. On low-range Android devices the FPS is fine in Release builds. On mid-range Android phones, performance is good even with Debug builds.
 
 I have created a cross-platform app to make this technology available for an easy demonstration. You could install `Filters Camera` from [AppStore](https://apps.apple.com/us/app/filters-camera/id6749823005) and [GooglePlay](https://play.google.com/store/apps/details?id=com.appomobi.drawnui.shaderscam) as we would further discuss the development process behind it. The app also runs on Windows and on Mac, but you would need to compile it yourself. Link to complete source code is [at the end](#source-code) of this article.
 
