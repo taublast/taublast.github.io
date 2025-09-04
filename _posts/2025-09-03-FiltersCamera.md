@@ -55,7 +55,7 @@ if (_shader != null && !VisualEffects.Contains(_shader))
   }
 ````
 
-What is `ClippedShaderEffect`? A subclassed "standart" `SkiaShaderEffect` with some additional clipping applied. When playing with Fit and Fill modes I realized we needed to clip the rendering area of the camera display it to the actual image area to avoid applying shader to black borders that appear in case of Fit. `SkiaImage` provides us with `DisplayRect` property that returns the real rect taken by the scaled image source on the canvas. While the whole image control would take its `DrawingRect` area with borders included.
+ `ClippedShaderEffect` is a subclassed "standard" `SkiaShaderEffect` with some additional clipping applied. When playing with Fit and Fill modes I realized we needed to clip the rendering area of the camera display it to the actual image area to avoid applying shader to black borders that appear in case of Fit. `SkiaImage` provides us with `DisplayRect` property that returns the real rect taken by the scaled image source on the canvas. While the whole image control would take its `DrawingRect` area with borders included.
 
 ````csharp
 public class ClippedShaderEffect : SkiaShaderEffect
@@ -125,8 +125,6 @@ style="margin-top: 16px;" />
 *Sin City shader, enhancing all red tones and making everything else ink black and white, creating a specific mood.*
 
 If you dig inside included shaders code you would see a base for combining reusable functions across different shaders. For example few of them apply a zoom lens effect: in theory our app could apply them to every shader, we could let users select a lens to be applied on top of any of color effects. 
-
-An important challenge for our case was to make shaders provide same visual result on small preview and large scale captured images. Best demonstrated with Sketch where when the image size grows more smaller lines could appear making the captured image totally different from preview, problem solved!
 
 ### Desktop SKSL Editor
 
