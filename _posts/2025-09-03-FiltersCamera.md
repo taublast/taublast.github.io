@@ -122,7 +122,7 @@ I have created all of the shaders used in the app with the help of LLMs. Interes
 <img src="../assets/img/car.jpg" width="350" alt="Sin City Shader"
 style="margin-top: 16px;" />
 
-*Batman Sin Cityhader, enhancing all red tones and making everything elase ink black and white.*
+*Sin City shader, enhancing all red tones and making everything else ink black and white, creating a specific mood.*
 
 If you dig inside included shaders code you would see a base for combining reusable functions across different shaders. For example few of them apply a zoom lens effect: in theory our app could apply them to every shader, we could let users select a lens to be applied on top of any of color effects. 
 
@@ -134,7 +134,7 @@ The question arose very rapidly on how to develop shaders for the app, to be abl
 
 We have this wonderful MAUI feature for desktop as to open new app pages in stand-alone windows and this has brought the SKSL Editor to life: on desktop you need to long-press the shader preview in the drawer menu to make the editor appear in a new window.
 
-<img src="../assets/img/editor.jpg" alt="Breakout"  
+<img src="../assets/img/editor.jpg" alt="SKSL Editor"  
 style="margin-top: 16px;" />
 
 *Working inside shader editor on Windows PC and a webcam with my daughter helping me much.*
@@ -175,7 +175,8 @@ Please feel free to contribute your own shaders and any improvements!
 * [ShadersCamera Repository](https://github.com/taublast/ShadersCamera) - Complete source code and setup instructions
 
 ![Filters Camera on iPad](../assets/img/ipad.jpg){: .left width="300"}
-
+* [AppStore](https://apps.apple.com/us/app/filters-camera/id6749823005) - install on iPhone and iPad
+* [GooglePlay](https://play.google.com/store/apps/details?id=com.appomobi.drawnui.shaderscam) - Install on Android
 * [SkiaCamera Control](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera) - The camera preview control used in the app
 * [DrawnUI Demo](https://github.com/taublast/DrawnUi.Maui.Demo) - Another example of using SkiaCamera
 * [DrawnUI for .NET MAUI](https://github.com/taublast/DrawnUi) - The rendering engine powering the camera effects
