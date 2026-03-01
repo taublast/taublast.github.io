@@ -5,23 +5,23 @@ date: 2026-03-01 12:00:00 +0000
 categories: [MAUI, DrawnUI, Audio, Shaders]
 tags: [dotnetmaui, skiasharp, drawnui, audio, sksl, shaders]    
 description: Building a real-time pitch and BPM detection app using DrawnUI, SkiaCamera audio processing, and live SKSL shaders.
-image: /assets/img/soltempo.jpg
+image: /assets/img/soltempo_git.jpg
 ---
 
 # Building SolTempo: Realtime Audio Processing and Shaders in .NET MAUI
 
 This article is about **realtime audio processing and analysis in .NET MAUI**, while making an attractive UI with SKSL shaders, transitions and effects.
 
-Recent enhancements I shipped for DrawnUI’s `SkiaCamera` control (realtime video + audio processing) made this possible. I will touch video processing with realtime encoding in the next article, but meanwhile let’s have some fun with the audio: the control can also work in audio-only monitoring mode without using video capabilities.
+Recent enhancements shipped for DrawnUI’s `SkiaCamera` control (realtime video + audio processing) made this possible. I will touch video processing with realtime encoding in the next article, meanwhile let’s have some fun with the audio: our control can also work in audio-only monitoring mode without video capabilities.
 
-To demonstrate we now have [SolTempo](https://github.com/taublast/SolTempo): an open-source .NET MAUI app for iOS, Mac Catalyst, Android, and Windows that does realtime note pitch+BPM detection. It showcases a clean, cross-platform audio pipeline:
+[SolTempo](https://github.com/taublast/SolTempo) open-source .NET MAUI app for iOS, Mac Catalyst, Android, and Windows does realtime note pitch+BPM detection and showcases a clean, cross-platform audio pipeline:
 
 - capture mic audio in a simple way
-- apply an optional transform (Gain +5 in this app, but it could be anything: voice changer, EQ, noise gate…),
+- apply optional transforms (Gain +5 in this app, it could be anything: voice changer, EQ, noise gate…),
 - analyze audio samples (notes / BPM)
 - render visuals from that state
 
-On a quick note, another motivation for building this (took about a week) was to bring out another SKSL shaders use case for .NET MAUI, like creating a liquid glass simulation and more. This kind of “everything is smooth because Skia” is often associated with Flutter, but SkiaSharp makes it possible for .NET MAUI to play absolutely in the same league.
+Another motivation for building this (took about a week) app was to bring out another SKSL shaders use case for .NET MAUI, like creating a liquid glass simulation and some more. This kind of “everything can be drawn with Skia” is often associated with Flutter, but SkiaSharp makes it possible for .NET MAUI to play in the same league.
 
 <img src="../assets/img/sol_screenshots.png" alt="SolTempo" width="800"
 style="margin-top: 16px;" />
@@ -40,9 +40,9 @@ Here is what the app does:
 
 ## The Single Canvas Approach
 
-Like many of my previous MAUI apps, SolTempo is completely drawn on a single hardware-accelerated SkiaSharp `Canvas`. The only native control we use is the one presented via `DisplayActionSheet` — love using this one to keep platform-native feel for users.
+Like many of my previous MAUI apps, SolTempo is completely drawn on a single hardware-accelerated SkiaSharp-backed `Canvas`. The other native control we use is the one presented via `DisplayActionSheet` — love using this one to keep platform-native feel for users.
 
-All the navigation, modals, and popups happen inside this canvas. To make the UI feel alive SolTempo uses:
+All the navigation, modals, and popups happen inside the canvas. To make the UI feel pleasant SolTempo uses:
 
 - shader-based transitions when switching modules
 - shaders for entrance/exit of popups instead of usual scale/fade transforms
@@ -52,9 +52,9 @@ All the navigation, modals, and popups happen inside this canvas. To make the UI
 - a simple confetti helper when you hit a "Full Octave" streak
 - a neat animated shader for the "Perfect Streak" achievement
 
-The UI itself is assembled in code (.NET HotReload-friendly), no XAML.
+The UI itself is assembled in code (.NET HotReload-friendly), no XAML this time, and uses DrawnUI for layouts, gestures, shaders etc.
 
-For example the glass panel behind the notes module looks like this:
+For example creating the liquid glass panel behind the notes module looks like this:
 
 ```csharp
 new SkiaBackdrop()
@@ -79,9 +79,11 @@ new SkiaBackdrop()
 }
 ```
 
+The backdrop captures the background, a custom visal effect applies a shader to it. You can easily create your effects from scratch or subclassing some of the existing. The `GlassBackdropEffect` took a `SkiaShaderEffect` and wired up some custom properties on top for use with the `glass.sksl` shader shipped inside the `Resources\Raw` MAUI app folder.
+
 ## Realtime Audio with SkiaCamera
 
-If you’ve seen my previous camera/shader experiments (like [Filters Camera](../FiltersCamera/)), you might already know `SkiaCamera` as “the camera control”. But SolTempo uses it in a slightly different way: **audio-only monitoring**.
+If you’ve seen previous camera/shader experiments (like [Filters Camera](../FiltersCamera/)), you might already know `SkiaCamera` control. But SolTempo uses it in a slightly different way: **audio-only monitoring**.
 
 `SkiaCamera` can provide incoming audio buffers directly, so we can build a deterministic, cross-platform audio pipeline on top of it. The app continuously captures the audio feed, applies transforms if needed (like an optional +5 audio gain boost for low signals), and analyzes the samples to detect pitch or compute the BPM. Everything is processed on-device and then fed straight into UI visualizers.
 
@@ -94,6 +96,7 @@ public partial class AudioRecorder : SkiaCamera
 {
 	public AudioRecorder()
 	{
+        // flags for permissions that will be required when turning control On.
 		NeedPermissionsSet = NeedPermissions.Microphone;
 
 		// turn on AUDIO recorder mode
@@ -123,10 +126,13 @@ public partial class AudioRecorder : SkiaCamera
 }
 ```
 
-In SolTempo I do not save audio to disk. I just stick to monitoring + analysis, but the processing hook is the same place you would use to feed a recorder or encoder.
+Notice that in SolTempo we do not record (save audio to disk), we stick to monitoring + analysis. But in case you were recording, processing hook `OnAudioSampleAvailable` would be also used to transform audio before it would go to realtime audio encoder.
+
+Now that the sample is ready to be consumed:
 
 ```csharp
-// A sample that passed through OnAudioSampleAvailable processing comes ready for being consumed
+//we hooked Recorder.OnAudioSample += OnAudioSample;
+// now a sample that passed through processing comes in
 private void OnAudioSample(AudioSample sample)
 {
 	// notes detector module
@@ -143,38 +149,11 @@ private void OnAudioSample(AudioSample sample)
 }
 ```
 
-### What we analyze (quickly)
-
-Audio analysis could easily become a deep subject. SolTempo is not a “DSP library”, so I will keep this part short and practical.
-
-#### Pitch detection (notes module)
-
-The notes detector follows a classic approach:
-
-- keep a ring buffer of normalized samples
-- ignore silence with a simple signal check
-- use AMDF (Average Magnitude Difference Function) to estimate the period
-- apply parabolic interpolation around the best lag for a more precise frequency
-
-Then we convert the frequency to MIDI note + cents and do some smoothing, because vocal vibrato is real and UI jitter is not fun.
-
-#### BPM detection (music module)
-
-For BPM we build an energy history (circular buffers, no `List<T>.RemoveAt(0)` in a realtime loop) and search for periodicity.
-
-This is not meant to compete with DJ tools. The goal is “good enough” tempo feedback for practice and metronome-like sources.
-
-#### The bottom spectrum bars
-
-The bottom equalizer is a small frequency visualizer (`AudioSoundBars`) that uses logarithmic bins and time-based decay (so it keeps animating smoothly even when audio input stops).
-
-Now let’s focus on the rendering side.
+As audio analysis could easily become a deep subject, let's now focus on modules rendering.
 
 ## Rendering Modules
 
-After we analyze the data received via `AddSample` we need to paint our UI to show results to the user. 
-
-We use DrawnUI for NET MAUI to be able to unleash the power of SkiaSharp for rendering UIs. It brings is i'ts own `Canvas` handlers (better performance, fps-control, display sync) and a comfortable to use WPF/MAUI-like layout system.
+After we analyzed the data received via `AddSample` we need to paint our UI to show results to the user. We use DrawnUI for NET MAUI to be able to unleash the power of SkiaSharp for rendering UIs. It brings is i'ts own `Canvas` handlers (adapted for UI rendering, fps-control, display sync) and a comfortable to use WPF/MAUI-like layout system along with gestures support and much more.
 
 So in SolTempo modules can access SkiaSharp canvas to draw anything in to main ways, and mix them freely:
 
@@ -183,13 +162,97 @@ So in SolTempo modules can access SkiaSharp canvas to draw anything in to main w
 
 ### Use Drawn Controls
 
-A DrawnUI control is drawn when it and all of its parents are not cached (will draw on every frame) or it's cache is invalidated with an `Update()`. Why caching? Intead of drawing/calculating layouts/shadows/fonts etc on every frame we can fast draw either a pre-rendered bitmap (an `SkImage`) or a previously recorded set of drawing operations (an `SkPicture`). Using caching properly can make DrawnUI to operate in **retained mode**.
+A DrawnUI control is drawn on every frame when it and all of its parents are not cached or it's cache is invalidated with an `Update()`. Why caching? Intead of drawing/calculating layouts/shadows/fonts etc on every frame we can fast draw either a pre-rendered bitmap (`SkImage`) or a previously recorded set of drawing operations (`SkPicture`). Using caching properly can make DrawnUI to practically operate in **retained mode**.
 
-A cached control will be invalidated when some child property changes, for example if we have a SkiaLabel inside and we change its `Text` the control's cache will be invalidated and it will be redrawn. At the same time in our case if we processed audio and we now want to draw a **changed** visual EQ we would call `Update` manually.
+A cached control will be invalidated when some child property changes, for example a `Text` property of a `SkiaLabel `, or an `Update` was called to ivalidate cache. So we have to invalidate manualy in case we processed audio and we want to draw **changed** visual EQ graphic. Otherwise the control representing an audio module or even its top parent would just be fast drawn from cache or even better: not invalidating the `Canvas` at all if other controls didn't change either. The app canvas redraws only if something really changed, contrary to the usual SkiaSharp usage flow.
+
+Speaking of example, the module detecting BPM is created as follows:
+
+```csharp
+public AudioMusicBPM()
+{
+    UseCache = SkiaCacheType.Operations;
+
+    Children = new List<SkiaControl>
+    {
+        new SkiaLabel
+        {
+            FontSize = 140,
+            //MonoForDigits = "8", <-- this would make font act as mono, digits will take width of "8" and text will not "jump" when number changes, might useful for HUDs etc. We don't use this on purpose here to get a more vivid and less "toolish" look.
+            CharacterSpacing = 5.0,
+            IsParentIndependent = true,
+            Margin = new (2,16),
+            MaxLines = 1,
+            LineBreakMode = LineBreakMode.CharacterWrap,
+            UseCache = SkiaCacheType.Operations,
+            FontAttributes = FontAttributes.Bold,
+            FontFamily = AppFonts.Default,
+            TextColor = Colors.White,
+            HorizontalOptions = LayoutOptions.Center,
+        }.Assign(out _labelBpm),
+
+        new SkiaLabel
+        {
+            Text = "BPM",
+            Margin = new(0,150,0,0),
+            FontSize = 24,
+            FontFamily = AppFonts.Default,
+            TextColor = Colors.Gray,
+            HorizontalOptions = LayoutOptions.Center,
+            UseCache = SkiaCacheType.Operations,
+        }.Assign(out _labelBpmUnit),
+
+        new SkiaLabel
+        {
+            FontSize = 19,
+            Margin = new(0,180,0,0),
+            FontFamily = AppFonts.Default,
+            TextColor = Colors.LimeGreen,
+            HorizontalOptions = LayoutOptions.Center,
+            UseCache = SkiaCacheType.Operations,
+        }.Assign(out _labelConfidence),
+
+        new SkiaLabel
+        {
+            Margin = new Thickness(16,40),
+            Text = "Tap to reset BPM metering",
+            FontSize = 22,
+            FontFamily = AppFonts.Default,
+            TextColor = Colors.LightGray,
+            VerticalOptions = LayoutOptions.Start,
+            HorizontalOptions = LayoutOptions.Center,
+            UseCache = SkiaCacheType.Operations,
+            IsVisible = true,
+        }.Assign(out _labelNoSignal),
+
+    };
+}
+
+```
+
+You could also use XAML too for DrawnUI as demonstrated by other articles/apps, today i am mainly [using code-behind](https://drawnui.net/articles/fluent-extensions.html), i love how .NET HotReload works with this approach. 
+
+<TODO>
+insert gif video of hotreload in action
+</TODO>
+
+And let's not forget about gestures:
+
+```csharp
+        public override ISkiaGestureListener ProcessGestures(SkiaGesturesParameters args, GestureEventProcessingInfo apply)
+        {
+            if (args.Type == TouchActionResult.Tapped)
+            {
+                Reset(); //reset our audio module to start analysing from scratch
+                return this; //this means "who consumed the gesture"
+            }
+            return base.ProcessGestures(args, apply); //would return null or one of the possible children if they consume anything
+        }
+```
 
 ### Access Canvas DIrectly
 
-Then control (our audio module) would be drawn like this:
+We can override the main painting method of any `SkiaControl` to access the drawing surface:
 
 ```csharp
 
@@ -197,15 +260,13 @@ protected override void Paint(DrawingContext ctx)
     {
         base.Paint(ctx); //background + changed children, like our labels etc, will be painted automatically inside
 
-        //and we can draw directly on the canvas, EQ lines etc
-        //all you need for this:
-            var canvas = ctx.Context.Canvas;
-        float scale = ctx.Scale;
-        SKRect destination = this.DrawingRect;
-        
-        //you are now all set to draw manually on you SkiaSharp SkCavas in a "usual manual" way
-        // ...
-    
+        //we have total access to SkiaSharp canvas to draw EQ lines etc, all data we might need is:
+        var canvas = ctx.Context.Canvas; //SkCanvas
+        float scale = ctx.Scale; //density, how many pixels in one point
+        SKRect destination = this.DrawingRect; //in pixels, after measure/arrange
+            
+        //an example of a usual SkiaSharp primitive:
+        canvas.DrawOval(destination.Width/2.0f, destination.Height/2.0f, 15 * scale, 11 * scale, somePaint); //if we use scale it will look same size on any device/platform
     }
 
 ```
