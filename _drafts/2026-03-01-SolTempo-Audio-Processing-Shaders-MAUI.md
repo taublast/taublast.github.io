@@ -10,20 +10,18 @@ image: /assets/img/soltempo.jpg
 
 # Building SolTempo: Realtime Audio Processing and Shaders in .NET MAUI
 
-This article is about **realtime audio processing and analysis in .NET MAUI**, while still keeping the UI very much alive with SKSL shaders, transitions and effects.
+This article is about **realtime audio processing and analysis in .NET MAUI**, while making an attractive UI with SKSL shaders, transitions and effects.
 
-Enhancements that DrawnUI for .NET MAUI `SkiaCamera` control recently received, like realtime video and audio processing made this possible. We will touch video processing with realtime encoding in the next article, meanwhile let's have some fun with the audio: control can also work as a standalone audio recorder without using video capabilities.
+Recent enhancements I shipped for DrawnUI’s `SkiaCamera` control (realtime video + audio processing) made this possible. I will touch video processing with realtime encoding in the next article, but meanwhile let’s have some fun with the audio: the control can also work in audio-only monitoring mode without using video capabilities.
 
-To demonstrate it I created [SolTempo](https://github.com/taublast/SolTempo): an open-source .NET MAUI app for iOS, Mac Catalyst, Android, and Windows that does realtime note pitch detection + BPM detection.
+To demonstrate we now have [SolTempo](https://github.com/taublast/SolTempo): an open-source .NET MAUI app for iOS, Mac Catalyst, Android, and Windows that does realtime note pitch+BPM detection. It showcases a clean, cross-platform audio pipeline:
 
-We showcase a clean, cross-platform audio pipeline where we can:
+- capture mic audio in a simple way
+- apply an optional transform (Gain +5 in this app, but it could be anything: voice changer, EQ, noise gate…),
+- analyze audio samples (notes / BPM)
+- render visuals from that state
 
-- capture mic buffers without messing with platform-specific audio APIs,
-- optionally apply a transform (Gain +5 in this app, but it could be anything: voice changer, EQ, noise gate…),
-- analyze the stream (notes / BPM),
-- and drive the visuals from that state.
-
-On a quick note, another motivation for building this (took about a week) was to bring out another SKSL shaders use case for .NET MAUI, like creating a liquid glass simulation and more. While some might think that such capabilities are reserved for different frameworks, using SkiaSharp makes .NET MAUI to play absolutely in the same league.
+On a quick note, another motivation for building this (took about a week) was to bring out another SKSL shaders use case for .NET MAUI, like creating a liquid glass simulation and more. This kind of “everything is smooth because Skia” is often associated with Flutter, but SkiaSharp makes it possible for .NET MAUI to play absolutely in the same league.
 
 <img src="../assets/img/sol_screenshots.png" alt="SolTempo" width="800"
 style="margin-top: 16px;" />
@@ -38,21 +36,21 @@ Here is what the app does:
 - Optional semitones (C#, Eb, etc.) or “natural notes only” mode
 - BPM / tempo detection (roughly 40–260 BPM)
 - Audio settings: choose input device (or System Default) and enable Gain (+5) for low signals
-- Streak achievements (octave / two octaves) with confetti and a fullscreen shader celebration
+- Streak achievements ("Full Octave" / "Perfect Streak") with confetti and a fullscreen shader celebration
 
 ## The Single Canvas Approach
 
-Like many my previous MAUI apps, SolTempo is completely drawn on a single hardware-accelerated Skia `Canvas`. The only native control we use is the one presented via `DisplayActionSheet`, love using this one to keep platform-native feel for users. 
+Like many of my previous MAUI apps, SolTempo is completely drawn on a single hardware-accelerated SkiaSharp `Canvas`. The only native control we use is the one presented via `DisplayActionSheet` — love using this one to keep platform-native feel for users.
 
-All the navigation, modals, and popups happen inside this canvas. To make the UI feel attractive SolTempo uses:
+All the navigation, modals, and popups happen inside this canvas. To make the UI feel alive SolTempo uses:
 
 - shader-based transitions when switching modules
 - shaders for entrance/exit of popups instead of usual scale/fade transforms
 - a dynamic liquid glass-like shader backdrop behind the main panel
 - a dynamic liquid glass-like shader backdrop behind the bottom icons menu panel
 - a constantly drawn audio equalizer at the bottom
-- a simple confetti helper when you hit a single octave streak
-- a neat animated shader for a double-octave streak achievement
+- a simple confetti helper when you hit a "Full Octave" streak
+- a neat animated shader for the "Perfect Streak" achievement
 
 The UI itself is assembled in code (.NET HotReload-friendly), no XAML.
 
@@ -83,9 +81,9 @@ new SkiaBackdrop()
 
 ## Realtime Audio with SkiaCamera
 
-If you’ve seen our previous camera/shader experiments (like [Filters Camera](../FiltersCamera/)), you might already know `SkiaCamera` as “the camera control”. But SolTempo uses it in a slightly different way: **audio-only monitoring**.
+If you’ve seen my previous camera/shader experiments (like [Filters Camera](../FiltersCamera/)), you might already know `SkiaCamera` as “the camera control”. But SolTempo uses it in a slightly different way: **audio-only monitoring**.
 
-`SkiaCamera` can provide us with incoming audio buffers directly, so we can build a deterministic, cross-platform audio pipeline on top of it. App continuously captures the audio feed, applies transforms if needed (like an optional +5 audio gain boost for low signals), and analyzes the samples to detect pitch or compute the BPM. Everything is processed on-device and then fed straight into UI visualizers.
+`SkiaCamera` can provide incoming audio buffers directly, so we can build a deterministic, cross-platform audio pipeline on top of it. The app continuously captures the audio feed, applies transforms if needed (like an optional +5 audio gain boost for low signals), and analyzes the samples to detect pitch or compute the BPM. Everything is processed on-device and then fed straight into UI visualizers.
 
 ### Audio-only mode
 
@@ -125,52 +123,98 @@ public partial class AudioRecorder : SkiaCamera
 }
 ```
 
-In this app we do not implement audio recording, but if we did, audio would be then encoded amplified with our gain.  
-We just stick to monitoring here:
+In SolTempo I do not save audio to disk. I just stick to monitoring + analysis, but the processing hook is the same place you would use to feed a recorder or encoder.
 
 ```csharp
 // A sample that passed through OnAudioSampleAvailable processing comes ready for being consumed
 private void OnAudioSample(AudioSample sample)
 {
-    //our BPM module
+	// notes detector module
 	if (_musicNotesWrapper.IsVisible)
 		NotesModule.AddSample(sample);
 
-    // notes detector module
+	// our BPM module
 	if (_musicBPMDetectorWrapper.IsVisible)
 		_musicBPMDetector?.AddSample(sample);
 
-    //EQ drawn on bottom
+	// EQ drawn on bottom
 	if (_equalizer.IsVisible)
 		_equalizer.AddSample(sample);
 }
 ```
 
-Analising audio could reveil itsself to be a deeper subject, I would like now to focus your attention on the rendering of analisys results.
+### What we analyze (quickly)
+
+Audio analysis could easily become a deep subject. SolTempo is not a “DSP library”, so I will keep this part short and practical.
+
+#### Pitch detection (notes module)
+
+The notes detector follows a classic approach:
+
+- keep a ring buffer of normalized samples
+- ignore silence with a simple signal check
+- use AMDF (Average Magnitude Difference Function) to estimate the period
+- apply parabolic interpolation around the best lag for a more precise frequency
+
+Then we convert the frequency to MIDI note + cents and do some smoothing, because vocal vibrato is real and UI jitter is not fun.
+
+#### BPM detection (music module)
+
+For BPM we build an energy history (circular buffers, no `List<T>.RemoveAt(0)` in a realtime loop) and search for periodicity.
+
+This is not meant to compete with DJ tools. The goal is “good enough” tempo feedback for practice and metronome-like sources.
+
+#### The bottom spectrum bars
+
+The bottom equalizer is a small frequency visualizer (`AudioSoundBars`) that uses logarithmic bins and time-based decay (so it keeps animating smoothly even when audio input stops).
+
+Now let’s focus on the rendering side.
 
 ## Rendering Modules
 
-After we analyse the data received via `AddSample` we need to paint our UI to show results to the user. All modules can do the drawing in two main ways:
+After we analyze the data received via `AddSample` we need to paint our UI to show results to the user. 
 
-* using DrawnUI controls
-* painting directly on the SkiaSharp SKCanvas
+We use DrawnUI for NET MAUI to be able to unleash the power of SkiaSharp for rendering UIs. It brings is i'ts own `Canvas` handlers (better performance, fps-control, display sync) and a comfortable to use WPF/MAUI-like layout system.
 
-<TODO>
-  
-explain how
-touch the fact that we have special skiasharp handlers different from standart skiasharp an we all due respect they act differently, they are designed for UI/games rendering with controlled FPS and display sync synchronization.
+So in SolTempo modules can access SkiaSharp canvas to draw anything in to main ways, and mix them freely:
 
-  </TODO>
+- **DrawnUI controls** (`SkiaLabel`, `SkiaShape`, layouts) for everything that feels like UI
+- **Direct SKCanvas painting** for “pure drawing” like waveforms, EQ shapes etc...
+
+### Use Drawn Controls
+
+A DrawnUI control is drawn when it and all of its parents are not cached (will draw on every frame) or it's cache is invalidated with an `Update()`. Why caching? Intead of drawing/calculating layouts/shadows/fonts etc on every frame we can fast draw either a pre-rendered bitmap (an `SkImage`) or a previously recorded set of drawing operations (an `SkPicture`). Using caching properly can make DrawnUI to operate in **retained mode**.
+
+A cached control will be invalidated when some child property changes, for example if we have a SkiaLabel inside and we change its `Text` the control's cache will be invalidated and it will be redrawn. At the same time in our case if we processed audio and we now want to draw a **changed** visual EQ we would call `Update` manually.
+
+### Access Canvas DIrectly
+
+Then control (our audio module) would be drawn like this:
+
+```csharp
+
+protected override void Paint(DrawingContext ctx)
+    {
+        base.Paint(ctx); //background + changed children, like our labels etc, will be painted automatically inside
+
+        //and we can draw directly on the canvas, EQ lines etc
+        //all you need for this:
+            var canvas = ctx.Context.Canvas;
+        float scale = ctx.Scale;
+        SKRect destination = this.DrawingRect;
+        
+        //you are now all set to draw manually on you SkiaSharp SkCavas in a "usual manual" way
+        // ...
+    
+    }
+
+```
 
 ## Shaders Everywhere
 
 One of the most interesting parts of SolTempo is the heavy use of SKSL shaders. Instead of basic static backgrounds or standard MAUI animations, we rely on the GPU.
 
-<TODO>
-  
-touch the fact that we have special skiasharp handlers different from standart skiasharp an we all due respect they act differently, they are designed for UI/games rendering with controlled FPS and display sync synchronization.
-
-  </TODO>
+This is also where the “single canvas” approach shines. You are not animating a pile of native views — you are drawing a scene. That makes it much easier to mix realtime audio analysis and realtime shaders without getting surprised by layout overhead or GC spikes.
 
 ### Liquid Glass Backdrop
 Behind the main interface, there is a realtime SKSL shader rendering a liquid glass-like effect. It gives the app a very distinct, modern look that reacts smoothly without taxing the CPU.
@@ -228,7 +272,7 @@ _mainStack.VisualEffects.Add(fx);
 fx.Play();
 ```
 
-2. **Achievement fullscreen celebration**. When the notes sequence tracker reports “two octaves streak” we add a fullscreen `AchievementEffect` shader (and remove it when done):
+2. **Achievement fullscreen celebration**. When the notes sequence tracker reports a “Perfect Streak” we add a fullscreen `AchievementEffect` shader (and remove it when done):
 
 ```csharp
 var fx = new AchievementEffect();
