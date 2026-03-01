@@ -26,6 +26,8 @@ Another motivation for building this (took about a week) app was to bring out an
 <img src="../assets/img/sol_screenshots.png" alt="SolTempo" width="800"
 style="margin-top: 16px;" />
 
+App is currently available in [AppStore](todo) and [GooglePlay](todo), you might consider installing it before further reading.
+
 ## SolTempo Features (Quick Overview)
 
 Here is what the app does:
@@ -79,7 +81,7 @@ new SkiaBackdrop()
 }
 ```
 
-The backdrop captures the background, a custom visal effect applies a shader to it. You can easily create your effects from scratch or subclassing some of the existing. The `GlassBackdropEffect` took a `SkiaShaderEffect` and wired up some custom properties on top for use with the `glass.sksl` shader shipped inside the `Resources\Raw` MAUI app folder.
+The backdrop captures the background, a custom visal effect applies a shader to it. You can easily create your effects from scratch or subclassing some of the existing. The `GlassBackdropEffect` took a `SkiaShaderEffect` and wired up some custom properties on top for use with the `glass.sksl` shader shipped inside the `Resources\Raw` MAUI app folder. We would see it in more details later in this article inside the `Liquid Glass Backdrop` section.
 
 ## Realtime Audio with SkiaCamera
 
@@ -250,7 +252,7 @@ And let's not forget about gestures:
         }
 ```
 
-### Access Canvas DIrectly
+### Accessing Canvas DIrectly
 
 We can override the main painting method of any `SkiaControl` to access the drawing surface:
 
@@ -273,21 +275,28 @@ protected override void Paint(DrawingContext ctx)
 
 ## Shaders Everywhere
 
-One of the most interesting parts of SolTempo is the heavy use of SKSL shaders. Instead of basic static backgrounds or standard MAUI animations, we rely on the GPU.
+One of the most interesting parts of SolTempo is the intensive use of shaders. Instead of basic  animations and the "usual" look, we rely on SkiaSharp v3 SKSL. This is also where the “single canvas” approach becomes useful, as we can make the whole UI elements tree be affected by shaders at will. 
 
-This is also where the “single canvas” approach shines. You are not animating a pile of native views — you are drawing a scene. That makes it much easier to mix realtime audio analysis and realtime shaders without getting surprised by layout overhead or GC spikes.
+As one might recall we already have been using shaders in [Filters Camera](https://github.com/taublast/ShadersCamera) and [ShadersCarousel](https://github.com/taublast/ShadersCarousel) apps, those gave us the a base for a confident use.
 
 ### Liquid Glass Backdrop
-Behind the main interface, there is a realtime SKSL shader rendering a liquid glass-like effect. It gives the app a very distinct, modern look that reacts smoothly without taxing the CPU.
 
-This is implemented as a `GlassBackdropEffect` (a small wrapper around `SkiaShaderEffect`) that binds a bunch of uniforms like corner radius, emboss/refraction, edge glow, and tint:
+We are in 2026 so we couldn't pass on using a liquid glass-like effect. It gives the app a very distinct and modern look. Our menu bar needed this one badly.
+
+<TODO>
+zoomed pic of the menu bar
+</TODO>
+
+An obvious choice was then to reuse it for main audio modules too, and this defined the final look of the app. This all was implemented as a `GlassBackdropEffect` (a small wrapper around `SkiaShaderEffect`), attachable to any control, it provides a lot of customizable properties like corner radius, emboss/refraction, edge glow, tint and much more. Shader runs when the parent `SkiaBackdrop` control redraws.
+
+I took a MIT licenced https://github.com/bergice/liquidglass shader that was deeply modified and resulted in a highly customisable visual effect.
 
 ```csharp
 public class GlassBackdropEffect : SkiaShaderEffect
 {
 	public GlassBackdropEffect()
 	{
-		ShaderSource = @"Shaders\\glass.sksl";
+		ShaderSource = @"Shaders\glass.sksl"; //shipped inside `Resources/Raw` MAUI app folder
 	}
 
 	protected override SKRuntimeEffectUniforms CreateUniforms(SKRect destination)
@@ -309,12 +318,13 @@ public class GlassBackdropEffect : SkiaShaderEffect
 }
 ```
 
-### Animated Popups and Achievements
-When you hit a streak of correct notes (full octave, and then a longer “perfect streak”), the app triggers encouraging effects. We used animated shaders to handle the appear and exit transitions of popups, as well as the achievement visual effects. Using shaders for these animations keeps the framerate high even when the audio processing is working hard in the background.
+### Animated Popups
 
-There are two fun bits here:
+In the mood of extensively using shaders I added entrance/exit shaders for popups that show help and settings. no more standart scale/fade transforms. In short we attach an entrance shader to show and an exit shader to hide the control. I created an `AnimatedPopup` class for that, and help and setting use it as base. I invite you to dig into the source code for a deeper look.
 
-1. **Shader transition when switching modules**. This is a single-texture transition shader driven by a progress animator. At progress `0.5` the screen is fully hidden, we swap the module, then the reveal phase shows the new state:
+#### Shader transition when switching modules
+
+This is a single-texture transition shader driven by a progress animator. At progress `0.0` we set the current control as shader texture source, at `0.5` (Midpoint) we set the second control as texture source to be used up to `1.0`, and we run a progress animator built into a `TransitionEffect`.
 
 ```csharp
 var fx = new TransitionEffect();
@@ -333,7 +343,11 @@ _mainStack.VisualEffects.Add(fx);
 fx.Play();
 ```
 
-2. **Achievement fullscreen celebration**. When the notes sequence tracker reports a “Perfect Streak” we add a fullscreen `AchievementEffect` shader (and remove it when done):
+### Achievement Effect
+
+When you sing a streak of correct notes for a double octave the app triggers encouraging effects. For the “Perfect Streak” we run an animated fullscreen `AchievementEffect` shader (and remove it when done):
+
+<TODO>pic of shader in action </TODO>
 
 ```csharp
 var fx = new AchievementEffect();
@@ -347,41 +361,66 @@ _background.VisualEffects.Add(fx);
 fx.Play();
 ```
 
-There is also a simple “confetti helper” for the first achievement, because you can’t ship a music practice app without confetti 😄.
+There is also a simple “confetti helper” for the single octave achievement, try sing a full octave to trigger it 😄.
 
 ## Built-in Live Shader Editor
 
-Writing SKSL shaders can be a trial-and-error process. To speed this up, I included a built-in shader live editor that runs when the app is compiled for Windows. 
-
-This means you can tweak the SKSL code inside the app, hit save, and instantly see the liquid glass background or the popup transition change in real-time. No need to recompile or restart the app.
-
-In SolTempo this is wired as a debug-only developer feature: on Windows, tapping **Settings** opens a separate window with the editor, preloaded with the current shader code.
-
-The important trick is that we stop loading the shader from file and replace it with in-memory code:
+Writing SKSL shaders can be a trial-and-error process. To speed this up, I was using a built-in shader live editor that runs when the app is run on Windows. It opens when you press Settings button, i was attaching the shader to be edited via a `shaderGlass` variable:
 
 ```csharp
-public void ChangeShaderCode(string code)
+ VisualEffects = new List<SkiaEffect>
 {
-	if (_editableShader == null)
-		return;
-
-	_editableShader.ShaderSource = null; // do not load from file anymore
-	_editableShader.ShaderCode = code;   // set our own code
+	new GlassBackdropEffect()
+	{
+		EdgeOpacity = 0.55f,
+		EdgeGlow = 0.95f,
+		Emboss = 9.2f,
+		BlurStrength = 1.0f,
+		Opacity = 0.9f,
+		Tint = Colors.Black.WithAlpha(0.33f),
+		CornerRadius = 24,
+		Depth = 1.66f
+	}.Assign(out shaderGlass) //for dev shader editor
 }
 ```
 
-It’s a very simple workflow, but for shader tuning it feels like cheating.
+which was used later like this:
+
+```csharp
+    private void TappedSettings()
+    {
+        _settingsPopup?.Show();
+#if DEBUG && WINDOWS
+        OpenShaderEditor(shaderGlass);
+#endif
+    }
+```
+
+This means you can tweak the SKSL code inside the app, hit `Apply`, and instantly see the liquid glass background or the popup transition change in real-time to your changed SKSL code, no need to restart the app for that. I used a similar workflow for [Filters Camera](https://github.com/taublast/ShadersCamera) app.
+
+## Additional Tricks
+
+### Help popup content shipped as Markdown
+
+App Help text required formatting, the **Help** popup loads its content from a Markdown file shipped inside the app package (`Resources/Raw/Markdown/help.en.md`). The popup just reads it at runtime once then sets a `SkiaRichLabel` property `Text` to markdown. Among other features this rather powerful control can parse and render markdown strings, including creating links.
+
+<TODO>picture markdown with MAUI logos</TODO>
+
+### Capping FPS on iOS (battery-friendly)
+
+On iOS skia view is using Apple Metal for hardware accelerated rendering. This one can be very power consuming (and heat generating) when running at max fps. Since this is not a game but we still need to render constantly when sound comes at 48000 Hz rate on iPhone we capped fps:
+
+```csharp
+#if IOS // spare battery because apple metal is draining much
+Super.MaxFps = 30;
+#endif
+```
+
+It is a small change which makes a difference for a "realtime" app that can run for hours if you practice solfeggio.
 
 ## Final Thoughts
 
-SolTempo is not “the ultimate tuner” and not “the ultimate BPM detector”. It’s a compact playground that demonstrates a workflow I really like:
-
-- capture realtime audio,
-- optionally process it (Gain, filters, whatever),
-- analyze it,
-- and render a UI that feels modern (shaders) without breaking the audio loop.
-
-And yes, there is a bit of an agenda here: to show that .NET MAUI is not limited to “forms and lists”. With SkiaSharp and the drawn approach you can ship apps that look and feel very far from the usual.
+SolTempo being a compact playground for realtime audio analisys, visualization and SKSL shaders usage, we demonstrated that .NET MAUI has a rather extended usage limits. With SkiaSharp and the drawn approach you can ship apps that look and feel very far from the usual.
 
 SolTempo is fully open-source, so if you want to dig in, clone it and start playing:
 
@@ -394,6 +433,8 @@ Privacy note: SolTempo does not collect, store, or share personal data. Audio an
 ## Links and Resources
 
 * [SolTempo](https://github.com/taublast/SolTempo) - complete source code
+* [AppStore](https://github.com/taublast/SolTempo) - install app on iOS
+* [GooglePlay](https://github.com/taublast/SolTempo) - install app on Android
 * [DrawnUI for .NET MAUI](https://github.com/taublast/DrawnUi) - the canvas rendering engine
 * [SkiaSharp](https://github.com/mono/SkiaSharp) - the underlying 2D graphics library
 * [SKSL documentation](https://skia.org/docs/user/sksl/) - Skia Shading Language reference
