@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Advanced Video and Audio Recording With Realtime Processing for .NET MAUI"
+title: "Advanced Video and Audio Recording With Real-Time Processing for .NET MAUI"
 description: "Record video/audio in .NET MAUI and bake overlays, captions, and visualizers directly into the final file - no post-processing step."
 date: 2026-02-12 12:00:00 +0000
 categories: [MAUI, DrawnUI, Camera, Video]
@@ -8,16 +8,16 @@ tags: [dotnetmaui, skiasharp, camera, video, audio, realtime, drawnui]
 image: /assets/img/appcam.png
 ---
 
-# Advanced Video Recording With Realtime Processing for .NET MAUI
+# Advanced Video Recording With Real-Time Processing for .NET MAUI
 
 Mobile apps need to be able capture video/audio in a comfortable way, to send live feed data to AI/ML, 
 to process video and audio feed before even encoding. Would it be just enhancing audio gain or 
-applying a watemark, up to drawing dynamic overlays over video frames being encoded and applying effects, in realtime, no post-processing.
+applying a watemark, up to drawing dynamic overlays over video frames being encoded and applying effects, in real-time, no post-processing.
 
 WIth `SkiaCamera` control we already had features:
 
-- capturing video feed in realtime to send small preview frames to AI/ML
-- applying effects/overlays to live photo preview in reatime
+- capturing video feed in real-time to send small preview frames to AI/ML
+- applying effects/overlays to live photo preview in real-time
 - appling effects/overlays to hi-res still photo capture while saving, along with injecting metadata
 
 What now have added:
@@ -27,7 +27,7 @@ What now have added:
 - enhancing/analizing audio being recording/monitored in reatime
 - a pre-recording video feature - circular in-memory neverending video recording
 
-New features were developed to be used in a commercial app and have been tested with complex realtime processing while recording Full HD (1980x1080) videos. Supported platforms are Windows, iOS, and Android.
+New features were developed to be used in a commercial app and have been tested with complex real-time processing while recording Full HD (1980x1080) videos. Supported platforms are Windows, iOS, and Android.
 
 This article will cover the new features, how to use them, and comes with a sample code.
 
@@ -60,7 +60,7 @@ After porting it to MAUI there came a time to add a feature to allow users to re
 
 todo screenshots
 
- After playing with SkiaCamera for a while, it became clear that there was a place for a challenge to avoid post-processing and draw HUDs directly over video frames in realtime. A lot of time was spent optimizing the code, today it was tested to record Full HD videos at 30 fps with audio and all the SkiaSharp drawings over frames on all supported platforms. 
+ After playing with SkiaCamera for a while, it became clear that there was a place for a challenge to avoid post-processing and draw HUDs directly over video frames in real-time. A lot of time was spent optimizing the code, today it was tested to record Full HD videos at 30 fps with audio and all the SkiaSharp drawings over frames on all supported platforms. 
 
 App it's available on AppStore and GooglePlay, unfortunately the Android version is currently not available in EU and US due to another company owning the trademark there. You can still get it from here: [Racebox](https://github.com/taublast/Racebox)
 
@@ -79,7 +79,7 @@ SkiaCamera provides frames as SkCanvas to callbacks, so it's very easy to draw a
 
 A sample camera testing app comes with the repository, a good starting point to see how to use the control. 
 It demonstrates many features, including:
-- call OpenAI to generate realtime text-to-speech captions
+- call OpenAI to generate real-time text-to-speech captions
 - audio visualizers 
 
 todo teaser screenshot
@@ -362,7 +362,7 @@ This is where the new pipeline shines.
 
 When you set `UseRealtimeVideoProcessing = true`, SkiaCamera switches from the platform’s “native record button” flow to a capture pipeline where **each frame is composed and encoded**, and you get a callback to draw on it.
 
-### 1) Enable realtime capture-video flow
+### 1) Enable real-time capture-video flow
 
 ````csharp
 Camera.CaptureMode = CaptureModeType.Video;

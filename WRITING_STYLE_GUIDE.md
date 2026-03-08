@@ -44,7 +44,7 @@
 - Add a "quickly" section to control depth while signaling credibility:
 	- "What we analyze (quickly)" / "How it works (briefly)" → a few bullets on the real algorithmic steps.
 	- Immediately follow with "Now let’s focus on …" to move on before it turns into a DSP textbook.
-- Use a "Rendering Modules" section when there’s realtime data:
+- Use a "Rendering Modules" section when there’s real-time data:
 	- Describe the data path (`AddSample`) separately from the paint path (`Paint`/`Render`).
 	- Mention update scheduling explicitly (e.g., render returns a bool → schedule another frame).
 
