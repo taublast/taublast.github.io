@@ -1,4 +1,4 @@
-# Writing Style Guide for AI Analysis
+# Writing Style Guide for AI-Assisted Posts
 
 ## Author Profile
 **Technical Focus**: .NET MAUI, SkiaSharp, DrawnUI, cross-platform development, game development
@@ -21,6 +21,11 @@
 - Admits uncertainty when appropriate: "This is still an experiment for a commercial app"
 - Encourages reader action: "Would love to see what you build"
 
+### Competitive Framing (keep it sharp, not sloppy)
+- It's OK to contrast with other stacks (Flutter, native, etc.), but keep the wording professional and technical.
+- Prefer: "same league", "comparable", "this closes the gap" backed by concrete implementation details.
+- Avoid profanity or dunking; the point is capability + engineering, not drama.
+
 ## Article Structure Patterns
 
 ### Opening Strategy
@@ -34,6 +39,14 @@
 - Subsections with clear, descriptive headers
 - Progressive complexity (basic concepts → advanced techniques)
 - Practical examples throughout, not just at the end
+
+### Micro-Structure That Works Well
+- Add a "quickly" section to control depth while signaling credibility:
+	- "What we analyze (quickly)" / "How it works (briefly)" → a few bullets on the real algorithmic steps.
+	- Immediately follow with "Now let’s focus on …" to move on before it turns into a DSP textbook.
+- Use a "Rendering Modules" section when there’s real-time data:
+	- Describe the data path (`AddSample`) separately from the paint path (`Paint`/`Render`).
+	- Mention update scheduling explicitly (e.g., render returns a bool → schedule another frame).
 
 ### Closing Patterns
 - **Links to resources**: Always provides relevant repository links, documentation
@@ -60,6 +73,27 @@
 - **Performance considerations**: Mentions optimization techniques and impacts
 - **Troubleshooting**: Includes common pitfalls and solutions
 - **Alternative approaches**: Acknowledges other ways to solve problems
+
+### Explain the “Single Canvas” Angle in MAUI Terms
+- Translate the drawn approach into MAUI-native vocabulary.
+- Mention *handlers* explicitly when relevant:
+	- Typical MAUI UI: many `View`s → many platform handlers (native views) → measure/layout churn and lifecycle overhead.
+	- DrawnUI UI: a scene drawn into a single Skia surface (effectively one main canvas/handler) → you draw frames instead of rearranging native views.
+- Use this framing especially when the post is about shaders, transitions, and realtime visualization.
+
+### Realtime Loop Hygiene (what to emphasize)
+- Call out "no per-frame allocations" and stable update scheduling when it is true.
+- Describe the separation clearly:
+	- Audio / input path updates state.
+	- Render path paints the latest snapshot.
+- If you mention a numeric range (e.g., BPM min/max), ensure it matches real code or UI constraints.
+
+### Chronology and Cross-Links
+- Never imply an upcoming article is already published.
+- Use explicit phrasing:
+	- "in the next article" / "upcoming" / "later I’ll show".
+	- Avoid: "as I explained in the previous post" unless it is actually live.
+- When referencing drafts or not-yet-released work, keep it generic (no dead links).
 
 ## Language Patterns
 
@@ -88,6 +122,18 @@
 - **Community contributions**: Acknowledges collaborators and their work
 - **Multiple platforms**: Covers cross-platform considerations thoroughly
 - **Version awareness**: References specific tool versions and compatibility
+
+### Grounding and Verification Checklist
+Before finalizing an article, verify:
+- **Names match reality**: class names, method names, settings labels.
+- **UX strings match resources** (achievement titles, button captions, etc.).
+- **Counts and thresholds are not invented** (streak lengths, ranges, "X ms", etc.).
+- **Code snippets match the intent** (e.g., comments don’t swap module meaning).
+- **Claims about performance** are phrased as observations + reasons, not guarantees.
+
+If uncertain, write it like:
+- "In this app I’m not saving to disk; it’s monitoring + analysis".
+- "This is not meant to compete with pro tools; it’s good enough for practice".
 
 ### Problem-Solution Methodology
 1. **Real pain point identification**: Starts with genuine developer frustrations
@@ -137,12 +183,15 @@
 - **Tutorial oversimplification**: Don't assume readers are beginners
 - **Feature listing**: Avoid dry enumeration without context
 - **Sales pitch tone**: Keep commercial mentions brief and relevant
+- **Chronology inversion**: Don’t reference future posts as already published
+- **Front matter damage**: Never leak Markdown headings into YAML front matter; keep metadata clean
 
 ### Technical Approach
 - **Incomplete examples**: Always provide enough context to implement
 - **Single-platform bias**: Consider cross-platform implications
 - **Trend chasing**: Focus on stable, practical solutions
 - **Complexity hiding**: Be honest about implementation challenges
+- **Unverified specifics**: Don’t guess streak counts, thresholds, or exact algorithms if not checked in source
 
 ## Adaptation Guidelines for AI
 
@@ -154,6 +203,7 @@
 5. **Balance enthusiasm with realism**: Show excitement while acknowledging limitations
 6. **Structure for scanning**: Use headers, bullets, and code blocks effectively
 7. **End with engagement**: Always invite feedback and provide resources
+8. **Ground the details**: Cross-check wording against code/resources before shipping
 
 ### Key phrases and expressions to incorporate:
 - "What if you want..."
