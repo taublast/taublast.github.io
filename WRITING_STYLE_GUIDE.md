@@ -14,17 +14,47 @@
 - **Enthusiastic about technology**: Shows genuine excitement about possibilities
 - **Honest about limitations**: Acknowledges when approaches are experimental or have drawbacks
 - **Community-oriented**: Invites feedback, contributions, and collaboration
+- **Fellow-builder voice**: Sounds like someone who loves building this stuff for readers who love building it too, not like a distant reviewer evaluating products from the outside
 
 ### Tone Indicators
 - Uses rhetorical questions to engage readers: "What if you want that polished game-like icon..."
 - Shows personality through occasional humor and emojis (but not overdone)
 - Admits uncertainty when appropriate: "This is still an experiment for a commercial app"
 - Encourages reader action: "Would love to see what you build"
+- Should feel readable by smart university-age programmers, not only senior specialists.
+- Prefer lively magazine-style technical prose over dry inventory or changelog-like wording.
+- Avoid self-congratulatory tone. Do not write as if the ecosystem, the project, or the author has finally reached enlightenment.
+- Prefer "we" / "us" when it helps create a shared builder perspective. Avoid detached wording that sounds like a product review or analyst report.
+- Prefer fast, compressed prose when the audience will understand the context without hand-holding.
+- Openings can move in one dense sweep: tools first, interesting case second, no slow unpacking in between.
 
 ### Competitive Framing (keep it sharp, not sloppy)
 - It's OK to contrast with other stacks (Flutter, native, etc.), but keep the wording professional and technical.
 - Prefer: "same league", "comparable", "this closes the gap" backed by concrete implementation details.
 - Avoid profanity or dunking; the point is capability + engineering, not drama.
+- Respect third-party work explicitly. If another library, toolkit, or framework is mentioned, appraise what it genuinely does well.
+- Never criticize third-party tools, libraries, or frameworks.
+- Never frame the comparison around their "lacks", weaknesses, or failures.
+- When other solutions are mentioned, describe them factually and generously, and say what they do well before pivoting to what this project brings to the table.
+- If a third-party project deserves credit, give it plainly. Avoid backhanded praise like "it works, but...".
+- Preferred framing: "what this enables", "what this adds", "what level of control this gives us".
+
+### Third-Party Respect Rule
+- Mention other projects with respect.
+- Give concrete credit for their strengths, effort, and contribution to the ecosystem.
+- Write as if their authors may read the article.
+- Do not use praise as a setup for a put-down.
+- If this project takes a different direction, say that directly and neutrally: different emphasis, different tradeoff, different target scenario.
+- Avoid vague comparative framing like "better than it used to be" unless the article actually proves the comparison with concrete history and examples.
+- Do not sell this project by implying other approaches leave developers "stuck", force them into "workarounds", or reduce their work to a "black box".
+- Do not rank use-cases with throwaway phrases like "more interesting", "real", or "serious" just to make the current focus sound elevated.
+
+### Anti-Self-Congratulation Rule
+- Avoid wording that sounds like patting ourselves on the back.
+- Avoid maturity theater: "finally", "already", "at last", "now it is good", "where things get interesting", "this is where the real work starts".
+- Do not imply other tools are lesser just to make this project sound exciting.
+- Prefer concrete description over attitude. Name the capability, the tradeoff, and the scenario.
+- If praise is warranted, attach it to something specific and verifiable, not to vague claims of progress or superiority.
 
 ## Article Structure Patterns
 
@@ -33,6 +63,35 @@
 2. **Limitation Identification**: What current solutions don't do well
 3. **Value Proposition**: What the article will achieve/solve
 4. **Practical Focus**: Emphasis on real-world application
+
+### Reader-Friendly Framing
+- Avoid openings that read like release notes, product matrices, or machine-generated summaries.
+- Prefer opening with a concrete developer situation, an interesting "what if", or a vivid practical example.
+- Replace dry sections like "we already had" / "what was added" with narrative transitions that explain why the next capability matters.
+- Write as if for a student programming magazine: technical, excited, clear, and human.
+- Avoid article-meta phrasing like "this article looks at", "this post covers", or "this piece explores" when a direct reader-facing sentence would be stronger.
+- Write for a human reader deciding whether to keep reading, not for a bot categorizing content.
+- Do not sound like a distant reviewer describing somebody else's work. Write from inside the build: what we wanted, what we ran into, what we can do with it now.
+- Avoid abstract promo nouns like "territory", "space", or "path" when a concrete word like "job", "problem", "use-case" would say it better.
+- Avoid negative contrast as a hook. Prefer "here is what we can do" over "we are no longer trapped by X".
+- Do not point to "here" or "this" before the reader has actually seen something concrete. Early paragraphs should show the thing, not refer to the article's internal map.
+- If a sentence sounds like package metadata or a marketplace description, rewrite it. Prefer what the thing lets us do over what category label it belongs to.
+- Cut stacked descriptor sentences. Story, solve, and payoff beat taxonomy.
+- If the user rewrites a paragraph into a stronger cadence, adapt to that cadence across the article instead of drifting back to slower explanatory prose.
+- Prefer app-builder shorthand when it stays clear. Do not over-explain what code-lovers will get immediately.
+
+### Consistency Pass Rule
+- Every time you learn a paragraph-level writing lesson from an edit, re-read the whole article and apply the same correction everywhere the pattern appears.
+- Do not wait for the user to point out the second, third, or fourth copy of the same mistake.
+- If one sentence sounds synthetic, inspect the surrounding section for the same rhythm, framing, and vocabulary.
+- Once the editorial direction is clear, keep rewriting proactively. Do not ask whether to continue making the obvious next writing fixes.
+- When the user rewrites a sentence into a stronger shape, preserve that rhythm and momentum. Remove only the specific bad word or toxic phrase instead of rebuilding the whole sentence into something flatter.
+
+### Scope Control
+- If the underlying feature set is broad, narrow the article early and explicitly.
+- Good pattern: mention the bigger capability, then state what this post focuses on now.
+- Example framing: "video comes next; here we stay with audio-only monitoring".
+- This keeps the article focused and avoids implying that every subsystem will be covered in full.
 
 ### Section Organization
 - **Problem → Solution → Implementation → Results** flow
@@ -147,6 +206,7 @@ If uncertain, write it like:
 - **Code-first approach**: Shows implementation before discussing theory
 - **Progressive examples**: Builds from simple to complex use cases
 - **Cross-reference support**: Links between related concepts and articles
+- **Captions with intent**: When embedding video or screenshots, add a short caption saying what the reader should notice, and include platform/context if relevant.
 
 ## Engagement Strategies
 
