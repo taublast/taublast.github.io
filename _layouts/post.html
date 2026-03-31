@@ -4,7 +4,6 @@ refactor: true
 panel_includes:
   - toc
 tail_includes:
-  - comments
   - related-posts
   - post-nav
 ---
@@ -98,6 +97,13 @@ tail_includes:
   <div class="content">
     {{ content }}
   </div>
+
+  {% if page.comments and site.comments.provider %}
+    <section class="post-comments">
+      <div id="comments-wrapper"></div>
+      {% include comments.html %}
+    </section>
+  {% endif %}
 
   <div class="post-tail-wrapper text-muted">
     <!-- categories -->
