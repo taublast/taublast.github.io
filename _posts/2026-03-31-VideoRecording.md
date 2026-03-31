@@ -149,13 +149,13 @@ public partial class AppCamera : SkiaCamera
 		VideoQuality = VideoQuality.Standard;
 		EnableAudioRecording = true;
 
-		FrameProcessor = OnFrameProcessing;
-		PreviewProcessor = OnFrameProcessing;
+		ProcessFrame = OnFrameProcessing;
+		ProcessPreview = OnFrameProcessing;
 	}
 }
 ```
 
-That single choice changes the role of the control. Preview and recording now go through the same drawn overlay path. If your overlay is rendered during `FrameProcessor`, it is not a temporary UI decoration anymore — it becomes part of the encoded media. Recording becomes composition, not just capture.
+That single choice changes the role of the control. Preview and recording now go through the same drawn overlay path. If your overlay is rendered during `ProcessFrame`, it is not a temporary UI decoration anymore — it becomes part of the encoded media. Recording becomes composition, not just capture.
 
 ### UI Orientation
 
@@ -213,14 +213,14 @@ You can of course draw directly with `SKCanvas.DrawText`, `DrawRect`, and other 
 
 In the sample app I wanted something richer and easier to iterate on, so the overlay is built as a DrawnUI layout and then rendered onto frames.
 
-The `MainPage` creates a `CameraDataOverlay` and attaches it like this:
+The `MainPage` creates a `FrameOverlay` and attaches it like this:
 
 ```csharp
-_previewFrameOverlay = new CameraDataOverlay();
+_previewFrameOverlay = new FrameOverlay();
 CameraControl.InitializeOverlayLayouts(_previewFrameOverlay);
 ```
 
-Passing a single layout here means “reuse this overlay for both preview and recording”. If you need different measured trees for preview and recording, `InitializeOverlayLayouts` also accepts a separate recording layout instance.
+The same overlay instance is reused for both preview and recording. `InitializeOverlayLayouts` also sets `SkiaCacheType.Operations` on the outer layout so the render thread can snapshot it efficiently.
 
 Inside the overlay, the interesting bit is the double-buffered wrapper:
 
@@ -262,14 +262,9 @@ protected override AudioSample OnAudioSampleAvailable(AudioSample sample)
 
 	OnAudioSample?.Invoke(sample);
 
-	if (OverlayPreview is IAppOverlay appOverlay)
+	if (VideoDataOverlay is IAppOverlay appOverlay)
 	{
 		appOverlay.AddAudioSample(sample);
-	}
-
-	if (OverlayRecording is IAppOverlay appOverlayRecording)
-	{
-		appOverlayRecording.AddAudioSample(sample);
 	}
 
 	return base.OnAudioSampleAvailable(sample);
@@ -284,6 +279,8 @@ Two details matter in this flow:
 So the visualizer is not some fake animation layered on top of the UI. It is reacting to the same audio stream that is being monitored and, if enabled, recorded.
 
 The sample can cycle between several visualizers such as peak monitor, VU meter, oscillograph, sound bars, waveform bars, and a radial gauge.
+
+One thing to keep in mind: audio samples only surface when `EnableAudioMonitoring = true`. That flag gates `OnAudioSampleAvailable` — and since the captions pipeline feeds from the same stream, it is a prerequisite for speech transcription too.
 
 ## Captions from the camera audio
 
@@ -416,7 +413,7 @@ CameraControl.PreRecordDuration = TimeSpan.FromSeconds(5);
 
 In this mode the camera keeps a short in-memory circular buffer before the live recording begins. Press record once and it starts pre-recording. Press again and the live recording begins, with the saved file opening on the last few seconds that happened just before that moment. It is a very handy fit for logic-triggered recordings, where the clip should show the seconds leading into the event that triggered it.
 
-The sample UI exposes quick duration options of 2, 5, 10, and 15 seconds. For the full breakdown see the dedicated [PreRecording.md](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera/PreRecording.md) document.
+The sample UI exposes quick duration options: Off, 3, 5, and 10 seconds. For the full breakdown see the dedicated [PreRecording.md](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera/PreRecording.md) document.
 
 ## GPS and metadata injection
 
