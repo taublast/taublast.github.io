@@ -12,8 +12,8 @@ image: /assets/img/camhi.jpg
 
 ## Intro
 
-We have several ways of  recording video in .NET MAUI today, like the solid [CommunityToolkit.Maui.Camera](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/views/camera-view), MAUI [MediaPicker](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device-media/picker) and some more.
-For non-standart cases as heavy branding, filters, HUDs, audio and video real-time processing or  getting feed for AI/ML [`SkiaCamera`](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera) comes to help. Best for:  
+We have several solid ways of  recording video in .NET MAUI today, like [CommunityToolkit.Maui.Camera](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/views/camera-view), MAUI [MediaPicker](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device-media/picker) and more.
+For non-standard cases as heavy branding, filters, HUDs, audio and video real-time processing or  getting feed for AI/ML [`SkiaCamera`](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera) comes to help. Best for:  
 
 - Audio live processing
 - Live preview processing effects, sending to AI/ML etc
@@ -22,7 +22,7 @@ For non-standart cases as heavy branding, filters, HUDs, audio and video real-ti
 
 Provides useful hardware-level options like video stabilization, audio mode (raw, voice etc) and more, **SkiaCamera** is open source MIT software and supports **iOS, MacCatalyst, Android, and Windows**.
 
->On "why another camera library": started from a case of real-time photo filters that were applied to native camera preview and saved photos using **RenderScript** on Android and **Metal** shaders on iOS. When **SkiaSharp** introduced hardware acceleration for Windows it became totally worth to port this all to use SkiaSharp SKSL shaders. SkiaSharp demonstarted so much freedom to process and draw the camera feed, that video and audio capture and processing was confidently added on top .
+>On "why another camera library": this one is powered by **SkiaSharp**. Started from a case of real-time photo filters that were applied to native camera preview and saved photos using **RenderScript** on Android and **Metal** shaders on iOS. When SkiaSharp introduced hardware acceleration for Windows it became totally worth to port this all to use SkiaSharp SKSL shaders. SkiaSharp demonstrated so much freedom to process and draw the camera feed, that video and audio capture and processing was confidently added on top .
 
 There is actually a large [README](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera) in the repo, also the [previous article](https://taublast.github.io/posts/SolTempo/) was already about SkiaCamera audio processing and  today we will focus on video recording. The provided sample app also handles still photo capture. [The sample](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Samples/Camera) that comes with the repo is a powerful playground with almost all the camera settings, live audio visualizers, OpenAi powered captions encoded over the final video, SKSL video filters and much more.
 
@@ -150,13 +150,7 @@ public partial class AppCamera : SkiaCamera
 }
 ```
 
-That single choice changes the role of the control. Preview and recording now go through the same drawn overlay path.
-
-And that is the whole trick.
-
-If your overlay is rendered during `FrameProcessor`, it is not a temporary UI decoration anymore. It becomes part of the encoded media.
-
-That is the real point: `DrawnUi.Maui.Camera` lets us treat recording as composition, not just capture.
+That single choice changes the role of the control. Preview and recording now go through the same drawn overlay path. If your overlay is rendered during `FrameProcessor`, it is not a temporary UI decoration anymore — it becomes part of the encoded media. Recording becomes composition, not just capture.
 
 ### UI Orientation
 
@@ -358,8 +352,6 @@ You keep a renderer that can still work as plain SkiaSharp drawing code, but you
 
 That same approach works for other rendering systems too. If you have existing drawing code, you do not need to throw it away to use it inside the camera overlay pipeline.
 
-That matters because we can bring existing SkiaSharp rendering code into the camera workflow without rebuilding everything as a new UI stack.
-
 ## Start and stop recording
 
 The actual recording flow stays straightforward:
@@ -444,7 +436,7 @@ This way not only `SkiaCamera` will inject location metadata into a captured pho
 
 If your app needs branded recording, AI-assisted media, sports telemetry, guided capture, captions, or audio-reactive overlays, this control is aimed straight at that kind of problem. 
 
-I hope that `SkiaCamera` will help You create great things. PR's are always welcome!
+I hope that `SkiaCamera` will help you create great things. PRs are always welcome!
 
 ## Links and resources
 
