@@ -20,6 +20,11 @@ For non-standard cases as heavy branding, filters, HUDs, audio and video real-ti
 - Captured hi-res photo post-processing
 - Processing video in real-time before encoding
 
+<img src="../assets/img/raceland.jpg" alt="Racebox Video Recording" width="800"
+style="margin-top: 16px;" />
+
+*Production: Racebox .NET MAUI Android app recording video with HUD encoded in real-time.*
+
 Provides useful hardware-level options like video stabilization, audio mode (raw, voice etc) and more, **SkiaCamera** is open source MIT software and supports **iOS, MacCatalyst, Android, and Windows**.
 
 >On "why another camera library": this one is powered by **SkiaSharp**. Started from a case of real-time photo filters that were applied to native camera preview and saved photos using **RenderScript** on Android and **Metal** shaders on iOS. When SkiaSharp introduced hardware acceleration for Windows it became totally worth to port this all to use SkiaSharp SKSL shaders. SkiaSharp demonstrated so much freedom to process and draw the camera feed, that video and audio capture and processing was confidently added on top .
