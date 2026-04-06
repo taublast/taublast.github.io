@@ -12,8 +12,8 @@ image: /assets/img/camhi.jpg
 
 ## DrawnUi.Maui.Camera
 
-Several solid ways are available today dor recording videos in .NET MAUI. [CommunityToolkit.Maui.Camera](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/views/camera-view), MAUI [MediaPicker](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device-media/picker) and more.
-For non-standard cases, like applying video filters, HUDs and watermarks, processing audio or feeding frames to AI/ML in real-time, please meet the [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera) package.  
+Several solid ways are available today for recording videos in .NET MAUI. [CommunityToolkit.Maui.Camera](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/views/camera-view), MAUI [MediaPicker](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device-media/picker) and more.
+For non-standard cases, like applying video filters, HUDs and watermarks, processing audio or feeding frames to AI/ML in real-time, we can consider the [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera) package.  
 Best for:  
 
 - Live preview processing effects, sending to AI/ML
@@ -121,9 +121,9 @@ Camera will automatically turn off without changing `IsOn` when the app goes to 
 
 ## Sample App
 
-Like i said previously our sample app will present almost all the camera settings, live audio visualizers, OpenAi captions encoded with final video, SKSL video filters and much more. UI will be constructed with code. A XAML-based usage example lives in the separate [DrawnUI for .NET MAUI Demo](https://github.com/taublast/DrawnUi.Maui.Demo) repo.
+Repo sample app will present almost all camera settings, live audio visualizers, OpenAi captions encoded with final video, SKSL video filters and much more. UI will be constructed with code. A XAML usage example lives in a separate [DrawnUI for .NET MAUI Demo](https://github.com/taublast/DrawnUi.Maui.Demo) repo.
 
-Our sample app UI presents 3 main parts: 
+App UI presents 3 main parts: 
 
 * Top header allows fast switch between Photo an Video modes, and AI captions control.
 * A middle overlay quick camera control buttons also presents a captured feed tappable thumbnail
@@ -157,7 +157,7 @@ public partial class AppCamera : SkiaCamera
 
 `UseRealtimeVideoProcessing = true` is the key switch. Without it, the camera records natively and the overlay appears on screen only. With it, every frame passes through Skia before the encoder sees it — so anything drawn in `ProcessFrame` is permanently in the file. If your overlay renders during `ProcessFrame`, it is not a screen decoration anymore — it becomes part of the encoded media.
 
-Both handlers receive a `DrawableFrame`: a struct carrying the `SKCanvas` to draw into, the source camera `SKImage`, the current `Scale`, and an `IsPreview` flag. That flag lets you render differently for the live screen versus the saved file — for example, skipping expensive overlay elements during preview to save CPU.
+Both handlers receive a `DrawableFrame`: a struct carrying the `SKCanvas` to draw into, the source camera `SKImage`, the current `Scale`, and an `IsPreview` flag. That flag lets you render differently for the live screen versus the saved file. In our sample we keep one shared overlay tree, leave the audio EQ visible in both paths, and only change the captions placement depending on whether the current frame is preview or recording.
 
 ### UI Orientation
 
@@ -235,14 +235,7 @@ You can of course draw directly with `SKCanvas.DrawText`, `DrawRect`, and other 
 
 In the sample app I wanted something richer and easier to iterate on, so the overlay is built as a DrawnUI layout and then rendered onto frames.
 
-The `MainPage` creates a `FrameOverlay` and attaches it like this:
-
-```csharp
-_previewFrameOverlay = new FrameOverlay();
-CameraControl.InitializeOverlayLayouts(_previewFrameOverlay);
-```
-
-The same overlay instance is reused for both preview and recording. `InitializeOverlayLayouts` also sets `SkiaCacheType.Operations` on the outer layout so the render thread can snapshot it efficiently.
+We could build separate overlay trees for preview and recording. That is sometimes the right call, especially if the two paths have very different visuals or lifetimes. In this sample we went the other way and reused one overlay instance. That keeps memory use lower, keeps the visualizer and captions state in one place, and still lets us adapt parts of the layout per frame.
 
 Inside the overlay, the interesting bit is the double-buffered wrapper:
 
@@ -264,7 +257,28 @@ This matters because the encoder thread wants a fast snapshot of the overlay wit
 That overlay contains two visible modules:
 
 - an audio visualizer panel in the top-right corner
-- a captions panel near the bottom rendered with `SkiaRichLabel`
+- a captions panel rendered with `SkiaRichLabel`
+
+The EQ panel can stay where it is for both preview and recording. Captions are different. During preview the app HUD is large and sits over the lower part of the camera feed, so bottom-aligned captions would fight with the controls. For that reason the sample centers the captions panel vertically while drawing preview frames, then moves it back toward the bottom for recorded frames.
+
+That switch is tiny but useful, and the overlay updates only when the mode actually changes:
+
+```csharp
+public bool AdaptLayoutToMode(bool isPreview)
+{
+	if (_wasPreviewMode == isPreview)
+	{
+		return false;
+	}
+
+	_wasPreviewMode = isPreview;
+	_captionsPanel.VerticalOptions = isPreview ? LayoutOptions.Center : LayoutOptions.End;
+
+	return true;
+}
+```
+
+And inside `OnFrameProcessing` we call `AdaptLayoutToMode(frame.IsPreview)` before measuring and rendering the overlay.
 
 So we get a proper layout tree that can still be rendered onto live frames.
 
@@ -343,9 +357,9 @@ The implementation uses a WebSocket to the OpenAI Realtime transcription endpoin
 
 - partial deltas are appended as they stream in
 - committed phrases become finalized lines
-- older lines expire and fade out through an `AnimatedShaderEffect` — a shader-driven animation that runs through the same `ProcessFrame` path, so it renders correctly in recorded frames too
+- older lines expire and fade out through an `AnimatedShaderEffect` — a shader-driven animation that runs through the same overlay pipeline, so it renders correctly in recorded frames too
 
-Since the same overlay handles both preview and recording, captions stay visible live and are burned into the final video with no second export pass.
+Since the same overlay handles both preview and recording, captions stay visible live and are burned into the final video with no second export pass. The only layout difference is where they sit: centered during preview so the app HUD does not cover them, then bottom-aligned in the recorded output.
 
 <!-- TODO: add video showing live speech captions over preview and the saved file -->
 
