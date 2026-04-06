@@ -10,26 +10,29 @@ image: /assets/img/camhi.jpg
 
 # AI Captions and Live Video Processing in .NET MAUI
 
-## Intro
+## DrawnUi.Maui.Camera
 
-We have several solid ways of  recording video in .NET MAUI today, like [CommunityToolkit.Maui.Camera](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/views/camera-view), MAUI [MediaPicker](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device-media/picker) and more.
-For non-standard cases as heavy branding, filters, HUDs, audio and video real-time processing or  getting feed for AI/ML [`SkiaCamera`](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera) comes to help. Best for:  
+Several solid ways are available today dor recording videos in .NET MAUI. [CommunityToolkit.Maui.Camera](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/views/camera-view), MAUI [MediaPicker](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device-media/picker) and more.
+For non-standard cases, like applying video filters, HUDs and watermarks, processing audio or feeding frames to AI/ML in real-time, please meet the [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera) package.  
+Best for:  
 
-- Audio live processing
-- Live preview processing effects, sending to AI/ML etc
+- Live preview processing effects, sending to AI/ML
 - Captured hi-res photo post-processing
 - Processing video in real-time before encoding
+- Audio live processing
 
 <img src="../assets/img/raceland.jpg" alt="Racebox Video Recording" width="800"
 style="margin-top: 16px;" />
 
-*Production: Racebox .NET MAUI Android app recording video with HUD encoded in real-time.*
+*Use case: a published .NET MAUI Android app recording video with encoded overlay in real-time.*
 
-Provides useful hardware-level options like video stabilization, audio mode (raw, voice etc) and more, **SkiaCamera** is open source MIT software and supports **iOS, MacCatalyst, Android, and Windows**.
+Package provides a **SkiaCamera** control with useful hardware-level options like video stabilization, audio mode (raw, voice etc) and more. It is open source MIT software and supports **iOS, MacCatalyst, Android, and Windows**.
 
->On "why another camera library": this one is powered by **SkiaSharp**. Started from a case of real-time photo filters that were applied to native camera preview and saved photos using **RenderScript** on Android and **Metal** shaders on iOS. When SkiaSharp introduced hardware acceleration for Windows it became totally worth to port this all to use SkiaSharp SKSL shaders. SkiaSharp demonstrated so much freedom to process and draw the camera feed, that video and audio capture and processing was confidently added on top .
+>Powered by **SkiaSharp** and designed for feed realtime/post processing. Born from a case of real-time filters applied to native camera preview and photos with **RenderScript** on Android and **Metal** shaders on iOS. After SkiaSharp introduced hardware acceleration for Windows it became worth to port all to SkiaSharp SKSL shaders. Then SkiaSharp demonstrated much freedom to process and draw camera feed, so video and audio processing were added.
 
-There is actually a large [README](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera) in the repo, also the [previous article](https://taublast.github.io/posts/SolTempo/) was already about SkiaCamera audio processing and  today we will focus on video recording. The provided sample app also handles still photo capture. [The sample](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Samples/Camera) that comes with the repo is a powerful playground with almost all the camera settings, live audio visualizers, OpenAi powered captions encoded over the final video, SKSL video filters and much more.
+## Docs
+
+There is actually a [README](https://github.com/taublast/DrawnUi.Maui.Camera) serving as root to underlying docs in the repo. The [previous article](https://taublast.github.io/posts/SolTempo/) about SkiaCamera audio processing and  today we will focus on video recording. The provided sample app also handles still photo capture. [The sample app](https://github.com/taublast/DrawnUi.Maui.Camera/tree/main/src/Samples/SkiaCameraDemo) coming with the repo is a powerful playground with almost all the camera settings, live audio visualizers, OpenAi powered captions encoded over the final video, SKSL video filters and much more. We will talk about this sample below.
 
 <!-- TODO: add hero video showing the sample app recording with EQ + live captions overlay -->
 
@@ -37,7 +40,7 @@ There is actually a large [README](https://github.com/taublast/DrawnUi/tree/main
 
 ## Control Setup
 
-To use `SkiaCamera` control inside a **.NET MAUI** app we need to install the package, initialize, and drop the camera into a hardware-accelerated **SkiaSharp** canvas.
+To use `SkiaCamera` inside a **.NET MAUI** app we need to install the package, initialize it, then drop the camera control into a hardware-accelerated **SkiaSharp** canvas.
 
 ### Install:
 
@@ -55,7 +58,7 @@ builder.UseDrawnUi();
 
 ### UI 
 
-Place control inside the canvas, for example:
+Position inside your app page, for example:
 
 ```xml
 xmlns:draw="http://schemas.appomobi.com/drawnUi/2023/draw"
@@ -80,13 +83,13 @@ xmlns:camera="clr-namespace:DrawnUi.Camera;assembly=DrawnUi.Maui.Camera"
 ```
 
 Important:
-* Keep the container stable: no `Auto` rows, no missing `Fill`, no missing width or height requests.
-* For correct saved feed orientation lock the app or the camera page to portrait. That does not mean we cannot respond to landscape rotation in the UI, and we do exactly that in this article's example.
+* Keep the container stable: no `Auto` rows, no unset width or height requests without a `Fill`.
+* For correct saved feed orientation lock the app or the camera page to portrait. That does not mean we cannot respond to landscape rotation in the UI, and we will do exactly that in the example below.
 
 
 ### Permissions
 
-Setup permissions per platform as described in the [README](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera). Then optionally define permission flags for your specific control so it can automatically check and request them:
+Setup permissions per platform as described in the [README](https://github.com/taublast/DrawnUi.Maui.Camera). Then optionally define permission flags for your specific control so it can automatically check and request them:
 
 ```csharp
 Camera.NeedPermissionsSet = NeedPermissions.Camera
@@ -96,10 +99,10 @@ Camera.NeedPermissionsSet = NeedPermissions.Camera
 
 ### Power On/Off
 
-The camera power is controlled by a static bindable `IsOn` property. Turn it on when we need it, for example right after the canvas appears:
+The camera power is controlled by a bindable `IsOn` property. Turn it on when we need it, for example right after the canvas appears:
 
 ```csharp
-// could attach this event handler in XAML too
+// can attach this event handler in XAML too
 Canvas.WillFirstTimeDraw += (sender, context) =>
 {
 	if (CameraControl != null)
@@ -114,15 +117,13 @@ Canvas.WillFirstTimeDraw += (sender, context) =>
 
 In case you have a dedicated camera page an obvious hook would be the one when your camera page did appeared: the exact code would depend on your app navigation implementation.
 
-Camera will automatically turn off without changing `IsOn` when the app goes to background, and will restore its power state when app resumes, no additional coding is needed for this. 
+Camera will automatically turn off without changing `IsOn` when the app goes to background, and will restore its state when app resumes, no additional coding is needed for this. 
 
 ## Sample App
 
-Now that we have our camera up and running, let's see what it can do.
+Like i said previously our sample app will present almost all the camera settings, live audio visualizers, OpenAi captions encoded with final video, SKSL video filters and much more. UI will be constructed with code. A XAML-based usage example lives in the separate [DrawnUI for .NET MAUI Demo](https://github.com/taublast/DrawnUi.Maui.Demo) repo.
 
-Sample uses only code-behind, another `SkiaCamera` usage example uses XAML: [DrawnUI For .NET MAUI Demo](https://github.com/taublast/DrawnUi.Maui.Demo)
-
-App UI has 3 main parts: 
+Our sample app UI presents 3 main parts: 
 
 * Top header allows fast switch between Photo an Video modes, and AI captions control.
 * A middle overlay quick camera control buttons also presents a captured feed tappable thumbnail
@@ -133,7 +134,6 @@ App UI has 3 main parts:
 That layout is useful because it makes the whole recording pipeline visible in one place. We are not just looking at a camera preview. We are looking at input settings, live processing, and final recording output all wired together.
 
 For this article the route is simple: keep real-time processing on, feed live audio into the overlay and speech pipeline, and record the composed result directly into the saved video.
-
 
 In the sample app, we subclassed `SkiaCamera` into an `AppCamera` for convenience and enabled the processed recording path by default:
 
@@ -155,7 +155,9 @@ public partial class AppCamera : SkiaCamera
 }
 ```
 
-That single choice changes the role of the control. Preview and recording now go through the same drawn overlay path. If your overlay is rendered during `ProcessFrame`, it is not a temporary UI decoration anymore — it becomes part of the encoded media. Recording becomes composition, not just capture.
+`UseRealtimeVideoProcessing = true` is the key switch. Without it, the camera records natively and the overlay appears on screen only. With it, every frame passes through Skia before the encoder sees it — so anything drawn in `ProcessFrame` is permanently in the file. If your overlay renders during `ProcessFrame`, it is not a screen decoration anymore — it becomes part of the encoded media.
+
+Both handlers receive a `DrawableFrame`: a struct carrying the `SKCanvas` to draw into, the source camera `SKImage`, the current `Scale`, and an `IsPreview` flag. That flag lets you render differently for the live screen versus the saved file — for example, skipping expensive overlay elements during preview to save CPU.
 
 ### UI Orientation
 
@@ -207,7 +209,27 @@ Super.RotationChanged += OnRotationChanged;
 
 And then applying inverse rotation to icons.
 
-## A drawn overlay with real structure
+## SKSL Video Filters — in the file, not just the preview
+
+This is the part that still makes me happy every time I think about it.
+
+Because every frame passes through Skia before the encoder sees it, SKSL shader effects are not limited to the preview. They get applied to the recording too. The MP4 you save already has the filter baked in — no post-processing step, no re-encode, nothing extra.
+
+The sample app exposes a `VideoEffect` property on `AppCamera`:
+
+```csharp
+CameraControl.VideoEffect = ShaderEffect.Retro;
+```
+
+`AppCamera` overrides both `RenderPreviewForProcessing` and `RenderFrameForRecording` to apply the active shader effect before handing the frame off — to the screen in one case, to the encoder in the other. The same SKSL shader that colors the preview is literally burned into every encoded frame as you record.
+
+Switch to `ShaderEffect.None` and you are back to clean capture. Switch mid-session and the filter change shows up in the file from that point forward.
+
+The sample ships with several SKSL presets to play with, and adding your own is a matter of writing a standard SKSL fragment shader.
+
+<!-- TODO: add side-by-side screenshot of same scene with and without a filter applied -->
+
+## Drawn Overlay
 
 You can of course draw directly with `SKCanvas.DrawText`, `DrawRect`, and other SkiaSharp primitives. Sometimes that is the right thing to do.
 
@@ -284,9 +306,18 @@ One thing to keep in mind: audio samples only surface when `EnableAudioMonitorin
 
 ## Captions from the camera audio
 
-The same audio stream is also used for real-time speech transcription.
+The same audio stream drives real-time speech transcription. Wire up two event handlers — one feeding the transcription service, one routing caption lines back into the overlay:
 
-`MainPage` subscribes to `AudioSampleAvailable` and feeds the transcription service with the raw PCM stream:
+```csharp
+CameraControl.AudioSampleAvailable += (data, rate, bits, channels)
+    => OnAudioCaptured(data, rate, bits, channels);
+
+_captionsEngine.CaptionsChanged += spans =>
+    MainThread.BeginInvokeOnMainThread(()
+        => _previewFrameOverlay.SetCaptions(spans));
+```
+
+Then feed incoming PCM into the service:
 
 ```csharp
 private void OnAudioCaptured(byte[] data, int rate, int bits, int channels)
@@ -306,21 +337,15 @@ private void OnAudioCaptured(byte[] data, int rate, int bits, int channels)
 }
 ```
 
-The implementation in this sample uses a WebSocket connection to the OpenAI Realtime transcription endpoint and runs incoming audio through `AudioSampleConverter` first, which handles resampling to 24 kHz and silence gating.
+The implementation uses a WebSocket to the OpenAI Realtime transcription endpoint and passes audio through `AudioSampleConverter` first, which handles resampling to 24 kHz and silence gating. To run the sample you will need your own `Secrets.cs` with the API key — the repo includes a template. An `AzureSpeechTranscriptionService` is also included as a drop-in alternative if you prefer Azure Cognitive Services.
 
-On top of that, a `RealtimeCaptionsEngine` maintains a rolling window of caption lines:
+`RealtimeCaptionsEngine` maintains a rolling window of caption lines:
 
-- partial deltas are appended quickly
+- partial deltas are appended as they stream in
 - committed phrases become finalized lines
-- older lines expire automatically after a short timeout
+- older lines expire and fade out through an `AnimatedShaderEffect` — a shader-driven animation that runs through the same `ProcessFrame` path, so it renders correctly in recorded frames too
 
-Those lines are pushed back into the overlay panel. Since the same overlay can be reused for recording frames, the captions can stay visible live and also be burned into the final video.
-
-That is the useful distinction:
-
-- feed audio to AI for live transcription
-- render the resulting text inside the frame overlay
-- get captions in preview and in the encoded file with no second export pass
+Since the same overlay handles both preview and recording, captions stay visible live and are burned into the final video with no second export pass.
 
 <!-- TODO: add video showing live speech captions over preview and the saved file -->
 
@@ -411,9 +436,11 @@ CameraControl.EnablePreRecording = true;
 CameraControl.PreRecordDuration = TimeSpan.FromSeconds(5);
 ```
 
-In this mode the camera keeps a short in-memory circular buffer before the live recording begins. Press record once and it starts pre-recording. Press again and the live recording begins, with the saved file opening on the last few seconds that happened just before that moment. It is a very handy fit for logic-triggered recordings, where the clip should show the seconds leading into the event that triggered it.
+`StartVideoRecording()` becomes a 3-state toggle in this mode. First call sets `IsPreRecording = true` — the camera starts filling an in-memory circular buffer but writes nothing to disk. Second call sets `IsRecording = true` — the buffered frames are prepended to the file and live recording begins. The saved clip opens from a few seconds before the user pressed record, which is exactly what you want for logic-triggered capture or sports moments that happen faster than human reaction time.
 
-The sample UI exposes quick duration options: Off, 3, 5, and 10 seconds. For the full breakdown see the dedicated [PreRecording.md](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera/PreRecording.md) document.
+Both `IsPreRecording` and `IsRecording` are bindable, so you can drive button morphs, labels, or other UI state directly from them.
+
+The sample UI exposes quick duration options: Off, 3, 5, and 10 seconds. For the full breakdown see the dedicated [PreRecording.md](https://github.com/taublast/DrawnUi.Maui.Camera/PreRecording.md) document.
 
 ## GPS and metadata injection
 
@@ -442,9 +469,9 @@ I hope that `SkiaCamera` will help you create great things. PRs are always welco
 
 ## Links and resources
 
-- [SkiaCamera / DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera) - control repository and documentation
-- [CameraTests sample app](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Samples/Camera) - sample app used in this article
-- [Pre-recording documentation](https://github.com/taublast/DrawnUi/tree/main/src/Maui/Addons/DrawnUi.Maui.Camera/PreRecording.md) - implementation and usage details
+- [SkiaCamera / DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera) - control repository and documentation
+- [CameraTests sample app](https://github.com/taublast/DrawnUi.Maui.Camera/tree/main/src/Samples/SkiaCameraDemo) - sample app used in this article
+- [Pre-recording documentation](https://github.com/taublast/DrawnUi.Maui.Camera/PreRecording.md) - implementation and usage details
 - [Racebox](https://github.com/taublast/Racebox) - commercial app that pushed the recorded-overlay workflow
 - [Previous article: Real-Time Camera Filters with Hardware-Accelerated Shaders in .NET MAUI](../FiltersCamera/) - earlier post focused on preview/photo processing
 - [DrawnUI for .NET MAUI](https://github.com/taublast/DrawnUi) - the UI rendering engine behind this control
