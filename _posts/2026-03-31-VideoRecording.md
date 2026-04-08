@@ -12,7 +12,7 @@ image: /assets/img/camhi.jpg
 
 If you just need camera capture in .NET MAUI, there are solid options already: [CommunityToolkit.Maui.Camera](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/views/camera-view), [MediaPicker](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device-media/picker), and platform-native APIs.
 
-For the other kind of job: when preview and recording are part of a realtime pipeline, and you want to process frames before they hit the encoder, please meet [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera).
+For the other kind of job: when preview and recording are part of a realtime pipeline, and you want to process frames before they hit the encoder, meet [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera).
 
 Best for:
 
@@ -38,6 +38,8 @@ We will focus on the control installation and the sample app which comes along w
 - OpenAI-powered real-time captions burned into output
 - Live video processing, SKSL shaders
 - Pre-recording (look-back capture)
+
+**TODO VIDEO OF APP**
 
 For a quick visual pass you can run the sample app on mobile or even your Windows or Mac machine if you have a camera attached!
 
@@ -93,7 +95,6 @@ Important:
 * Keep the container stable: no `Auto` rows, no unset width or height requests without a `Fill`.
 * For reliable saved feed orientation, lock the app or the camera page to portrait. The UI can still react to landscape rotation, and we will do that below.
 
-
 ### Permissions
 
 Set platform native permissions as documented in the [README](https://github.com/taublast/DrawnUi.Maui.Camera). Then optionally define flags so the control can request them automatically:
@@ -114,6 +115,8 @@ Canvas.WillFirstTimeDraw += (sender, context) =>
 {
 	if (CameraControl != null)
 	{
+		//delay camera startup to avoid too much work when starting up
+		//and let the first screen render faster
 		Tasks.StartDelayed(TimeSpan.FromMilliseconds(500), () =>
 		{
 			CameraControl.IsOn = true;
@@ -126,6 +129,9 @@ If you have a dedicated camera page, you can also flip `IsOn` from your page lif
 
 When the app goes to background, camera state is suspended and restored on resume without extra wiring in most cases.
 
+Under the hood SkiaCamera is a wrapper for a `SkiaImage` DrawnUI control that receives GPU-backed images coming from native camera. This control is accessible via `Display` property, and we can work with it directly if needed. When camera control turns off, we can, for example, easily blur the preview: `Display.Blur = 10;`.
+
+
 ## Sample App
 
 The repo sample exposes almost every relevant camera setting. Plus we have live audio visualizers, OpenAI captions encoded into final video and SKSL filters. UI is built in C# code. A XAML usage example lives in a separate repo: [DrawnUI for .NET MAUI Demo](https://github.com/taublast/DrawnUi.Maui.Demo).
@@ -135,6 +141,8 @@ App UI presents three main parts:
 * Top header for fast switching between Photo and Video modes, plus captions controls.
 * Middle quick-control overlay with recording actions and a tappable capture thumbnail.
 * Bottom drawer provides large camera settings organized into three sections: `Input`, `Processing`, and `Output`.
+
+**TODO SCREENSHOT OF APP SETTINGS TAB**
 
 `Input` controls camera selection, capture format, and mode.
 `Processing` controls realtime work: monitoring, visualizers, gain, and speech recognition.
@@ -172,13 +180,9 @@ Both handlers receive `DrawableFrame`: it carries the destination `SKCanvas`, so
 
 ### UI Orientation
 
-Camera apps usually lock capture UI to portrait, then rotate icons and controls as the device rotates. `SkiaCamera` follows that pattern. You lock page/app orientation, while DrawnUI still gives orientation values so your UI can respond at runtime. In this sample we are rotating icons upon device rotation.
+By default MAUI apps rotate Ui upon device orientation, but camera encoder expects a stable orientation. Lock the whole app to portrait at the platform level, then use DrawnUI's rotation event to rotate individual icons in response to device tilt - same as a native built-in camera app, without letting the layout flip.
 
-There are native ways to lock a specific page orientation, here we locked the whole app:
-
-**Android:**
-
-Inside `MainActivity.cs`, set `ScreenOrientation` on the activity attribute:
+**Android** - `MainActivity.cs`:
 
 ```csharp
 [Activity(Theme = "@style/Maui.SplashTheme",
@@ -186,11 +190,7 @@ Inside `MainActivity.cs`, set `ScreenOrientation` on the activity attribute:
 	...
 ```
 
-**iOS:**
-
-Edit `Info.plist`:
-
-App Store rules for iPad may require landscape unless `UIRequiresFullScreen` is enabled:
+**iOS** - `Info.plist` (iPad needs `UIRequiresFullScreen` or the App Store may require landscape support):
 
 ```xml
 <key>UIRequiresFullScreen</key>
@@ -206,17 +206,19 @@ App Store rules for iPad may require landscape unless `UIRequiresFullScreen` is 
 </array>
 ```
 
-Saved photo/video orientation is handled through normal media metadata flows. Depending on platform and player, orientation can be represented either as rotated pixels or metadata tags interpreted by the viewer.
-
-For UI, we mimic standard camera behavior and rotate quick-action icons with device orientation.
-
-This is easily done by subscribing to a DrawnUI event:
+We will still respond to device rotation: let's rotate app icons from a DrawnUI event:
 
 ```csharp
 Super.RotationChanged += OnRotationChanged;
-```
 
-And then applying inverse rotation to icons.
+ private void OnRotationChanged(object sender, int rotation)
+ {
+     var iconRotation = -NormalizeIconRotation(rotation);
+     _buttonSettings.Rotation = rotation;
+     _buttonFlash.Rotation = rotation;
+     _buttonSelectCamera.Rotation = rotation;
+ }
+```
 
 ## SKSL Video Filters 
 
@@ -224,10 +226,12 @@ We apply video filters, implemented with SKSL shaders to preview, captured photo
 
 Because every frame passes through Skia before encoding, SKSL effects can be applied to recorded video in real-time. The saved MP4 will contain filtered frames, no post-processing needed.
 
-The sample app exposes a `VideoEffect` property on `AppCamera`:
+The sample app exposes a `VideoEffect` helper property on `AppCamera`:
+
+**TODO SCREENSHOT OF FILTER EXAMPLE**
 
 ```csharp
-CameraControl.VideoEffect = ShaderEffect.Retro;
+CameraControl.VideoEffect = ShaderEffect.Movie;
 ```
 
 `AppCamera` overrides both `RenderPreviewForProcessing` and `RenderFrameForRecording` to apply the selected shader effect before handing frames to preview or encoder. Same effect, same path, different target.
@@ -243,14 +247,11 @@ private async void OnCaptureSuccess(object sender, CapturedImage captured)
 	{
 		var imageWithEffect = await CameraControl.RenderCapturedPhotoAsync(captured, null, image =>
 		{
-			if (CameraControl.VideoEffect != ShaderEffect.None)
-			{
 				var shaderEffect = new SkiaShaderEffect()
 				{
 					ShaderSource = ShaderEffectHelper.GetFilename(CameraControl.VideoEffect),
 				};
 				image.VisualEffects.Add(shaderEffect);
-			}
 		}, true);
 
 		captured.Image.Dispose();
@@ -317,6 +318,9 @@ Code locations in sample app:
 In `AppCamera.DrawOverlay`, we adapt both by mode and scale.
 `layout.AdaptLayoutToMode(frame.IsPreview)` switches preview vs recording caption placement, and `overlayScale` is computed from `frame.Scale` plus camera format so the same layout stays visually stable across preview and encoded frames.
 
+>To know the camera control location on the SkiaSharp canvas we can use camera property `SKRect DrawingRect`. When property `Aspect` is not set to `Fill` but rather to `Fit` we could have "black bars" around the real displayed frame, but then we can use `SKRect DisplayRect` property to get exact area where rescaled preview is drawn on the canvas.
+
+
 ## Use Audio for AI Captions
 
 In the next article we will  feed video data to ML to detect faces in realtime, for now let's use some AI for audio. Real-time speech transcription is wired like this:
@@ -346,7 +350,13 @@ private void OnAudioCaptured(byte[] data, int rate, int bits, int channels)
 }
 ```
 
-To run the sample, provide your own `Secrets.cs` API key file using the included template.
+To enable AI captions, open `src/Sample/Secrets.cs` and paste your OpenAI key:
+
+```csharp
+public static string OpenAiKey = "sk-...";
+```
+
+Without a key the sample compiles and runs normally - AI captions are simply disabled.
 
 We can draw received text onto our overlay:
 
@@ -357,6 +367,8 @@ _captionsEngine.CaptionsChanged += spans =>
 ```
 
 We marshal this callback to the UI thread because caption updates mutate DrawnUI controls (`SkiaRichLabel` text and visibility). Those updates must be serialized on the main thread to avoid cross-thread UI access issues.
+
+**TODO SCREENSHOT CAPTIONS**
 
 Captions are drawn as follow:
 
@@ -437,88 +449,72 @@ await CameraControl.StopVideoRecording(true);
 
 which discards the recording instead of finalizing it.
 
-## Pre-Recording: Capture Before Live
+## Pre-Recording: Look-Back Capture
 
-A rather interesting feature was developed for the Racebox app. Car dynamics measurement starts automatically and it triggers live video recording. At the same time we need those few seconds before that event to be present in the final video.
+Most recording apps miss the moment. Something happens, you tap record - and the two seconds before that tap are gone.
 
-Another simple use-case i can think of is any sport or family event when you are trying to catch a moment that would happen at an unknown time: pre-recording would record video into memory into a curcular buffer for an unlimited time, when the moment happens - start live recording and seconds before that will be pre-muxxed in the final video!
+Pre-recording solves this by running a silent circular buffer in memory continuously. Encoded frames keep flowing in and old ones drop off the tail. When you trigger live recording, the buffered segment is prepended to the file before the live feed. The final video contains both - no gap, no cut, no transition artifact.
 
-In sample UI this is exposed as an action sheet with:
+This was built for [Racebox](https://github.com/taublast/Racebox): the app detects a car launch event automatically and starts recording, but the most interesting frames - the moment right before launch - are already in the buffer. Works equally well for sports, family moments, wildlife - anything where you can't predict when the action starts.
 
-```csharp
-var durations = new (string Label, int Seconds)[]
-{
-	("Off", 0),
-	("3 seconds", 3),
-	("5 seconds", 5),
-	("10 seconds", 10),
-};
-
-CameraControl.EnablePreRecording = selected.Seconds > 0;
-if (selected.Seconds > 0)
-	CameraControl.PreRecordDuration = TimeSpan.FromSeconds(selected.Seconds);
-```
-
-Enable it in code like this:
+Enable it:
 
 ```csharp
 CameraControl.EnablePreRecording = true;
 CameraControl.PreRecordDuration = TimeSpan.FromSeconds(5);
 ```
 
-Both `IsPreRecording` and `IsRecording` are bindable, so you can drive button morphs, labels, or other UI state directly from them.
+The buffer runs silently in the background from that point on. When the user triggers recording, those last 5 seconds are already there. To abort and discard instead of saving:
 
-For the full breakdown see the dedicated [PreRecording.md](https://github.com/taublast/DrawnUi.Maui.Camera/PreRecording.md) document.
+```csharp
+await CameraControl.StopVideoRecording(true); // true = discard
+```
 
-## GPS and metadata injection
+Both `IsPreRecording` and `IsRecording` are bindable, so record button state, labels, and animations wire up directly without extra logic.
 
-The sample camera subclass also enables GPS metadata by default:
+For the full breakdown of the muxing flow see [PreRecording.md](https://github.com/taublast/DrawnUi.Maui.Camera/blob/main/PreRecording.md).
+
+## GPS and Metadata
+
+Enable location tagging with one flag:
 
 ```csharp
 InjectGpsLocation = true;
 ```
 
-and refreshes location when the camera turns on:
+Call `RefreshGpsLocation` when the camera turns on so coordinates are fresh before recording starts:
 
 ```csharp
 if (CameraControl.InjectGpsLocation)
-{
-	_ = CameraControl.RefreshGpsLocation();
-}
+    _ = CameraControl.RefreshGpsLocation();
 ```
 
-This injects location metadata into captured photos and MP4 videos. Whether and how it is shown depends on gallery/player support on the target platform.
+GPS is then embedded automatically - into the MP4 container for video, and into EXIF for photos. You don't touch the coordinates in your callbacks; they're already there.
 
-With `InjectGpsLocation` enabled your metadata will already contain GPS location when arrived to callback:
+For video you can still stamp branding fields into the container metadata:
 
 ```csharp
-// attached as CameraControl.RecordingSuccess += OnRecordingSuccess;
+// CameraControl.RecordingSuccess += OnRecordingSuccess;
 private async void OnRecordingSuccess(object sender, CapturedVideo capturedVideo)
 {
-	//SAVING VIDEO
-
-	captured.Meta.Vendor = "Me";
-	captured.Meta.Model = "My Recorder";
-	captured.Meta.Software = "My App";
-
-	var publicPath = await CameraControl.MoveVideoToGalleryAsync(capturedVideo);
+	capturedVideo.Meta.Vendor = "Me";
+	capturedVideo.Meta.Software = "My App";
+	var publicPath = await CameraControl.MoveVideoToGalleryAsync(capturedVideo, MauiProgram.Album);
 }
 ```
 
-For still photos, metadata is richer: the library `Metadata` model includes EXIF-style fields (ISO, shutter, aperture, lens info, orientation, GPS, timestamp, software/vendor/model), and those values are written when saving JPG streams to gallery:
+Photos get the full EXIF treatment: ISO, shutter speed, aperture, focal length, orientation, GPS, timestamp, software, vendor, model. The `Metadata` model exposes all of it before you save:
 
 ```csharp
-// attached as CameraControl.CaptureSuccess += OnCaptureSuccess;
+// CameraControl.CaptureSuccess += OnCaptureSuccess;
 private async void OnCaptureSuccess(object sender, CapturedImage captured)
 {
-	//SAVING PHOTO
-
 	captured.Meta.Software = "My App";
-	//feel free to explore and change captured.Meta
-
 	var path = await CameraControl.SaveToGalleryAsync(captured, "MyAppAlbum");
 }
 ```
+
+Whether GPS is displayed depends on the gallery or player reading the file, but the data is in there.
 
 ## Final thoughts
 
