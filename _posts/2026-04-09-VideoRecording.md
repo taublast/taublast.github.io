@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "AI Captions and Live Video Processing in .NET MAUI"
-description: "Build a .NET MAUI video processing pipeline with AI captions, live overlays, audio processing, and look-back capture during recording."
+description: "How to use SkiaCamera control in .NET MAUI for a video processing pipeline with AI captions, live overlays, audio processing, and look-back capture during recording."
 date: 2026-04-09 12:00:00 +0000
 categories: [MAUI, DrawnUI, Camera, Video]
 tags: [dotnetmaui, skiasharp, camera, video, audio, realtime, drawnui]
