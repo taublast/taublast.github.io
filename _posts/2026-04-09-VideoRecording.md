@@ -171,7 +171,7 @@ If you have a dedicated camera page, you can also flip `IsOn` from your page lif
 
 When the app goes to background, camera state is suspended and restored on resume without extra wiring in most cases.
 
-Under the hood SkiaCamera is a wrapper for a `SkiaImage` DrawnUI control that receives GPU-backed images coming from native camera. This control is accessible via `Display` property, and we can work with it directly if needed. When camera control turns off, we can, for example, easily blur the preview: `Display.Blur = 10;`.
+Under the hood SkiaCamera is a wrapper for a `SkiaImage` DrawnUI control that receives GPU-backed images coming from native camera. This control is accessible via the `Display` property, so anything `SkiaImage` supports — blur, tint, shader effects, custom rescaling — is available on the preview surface without subclassing the camera itself.
 
 
 ## Sample App
@@ -259,11 +259,11 @@ which discards the recording instead of finalizing it.
 
 ## Pre-Recording: Look-Back Capture
 
-Most recording apps miss the moment. Something happens, you tap record - and the two seconds before that tap are gone.
+Most recording apps miss the moment. Something happens, you tap record - but the time before that tap is gone.
 
 Pre-recording solves this by running a silent circular buffer in memory continuously. Encoded frames keep flowing in and old ones drop off the tail. When you trigger live recording, the buffered segment is prepended to the file before the live feed. The final video contains both - no gap, no cut, no transition artifact.
 
-This was built for [Racebox](https://github.com/taublast/Racebox): the app detects a car launch event automatically and starts recording, but the most interesting frames - the moment right before launch - are already in the buffer. Works equally well for sports, family moments, wildlife - anything where you can't predict when the action starts.
+Works equally well for sports, family moments, wildlife - anything where you can't predict when live action starts.
 
 Enable it:
 
@@ -370,6 +370,7 @@ Code locations in sample app:
 - Overlay composition and captions visual effects: `src/Sample/UI/FrameOverlay.cs`
 - Overlay rendering and scaling against frame data: `src/Sample/UI/AppCamera.cs` (`DrawOverlay` and `OnFrameProcessing`)
 - Captions feed and transcription wiring: `src/Sample/UI/MainPage.cs`
+- Caption rolling-window state and timers: `src/Sample/Services/RealtimeCaptionsEngine.cs`
 
 In `AppCamera.DrawOverlay`, we adapt both by mode and scale.
 `layout.AdaptLayoutToMode(frame.IsPreview)` switches preview vs recording caption placement, and `overlayScale` is computed from `frame.Scale` plus camera format so the same layout stays visually stable across preview and encoded frames.
@@ -435,7 +436,7 @@ CameraControl.AudioSampleAvailable += (data, rate, bits, channels)
     => OnAudioCaptured(data, rate, bits, channels);
 ```
 
-We feed incoming PCM into the OpenAi service:
+We feed incoming PCM into the transcription service:
 
 ```csharp
 private void OnAudioCaptured(byte[] data, int rate, int bits, int channels)
@@ -478,7 +479,7 @@ style="margin-top: 16px;" />
 
 *Recorded on Android, encoded captions, EQ and debug info*
 
-Captions are drawn as follow:
+Captions are drawn like this:
 
 ```csharp
 new SkiaShape()
@@ -506,7 +507,7 @@ new SkiaShape()
 
 Caption lifetime is managed by `RealtimeCaptionsEngine` as a rolling window. Each finalized paragraph is kept until either a newer paragraph pushes it past `maxLines` (3 by default), or the most recently added paragraph's timer expires. Older paragraphs are no longer removed individually on a per-line timer — they only roll off when displaced, which keeps the visible history stable while the user is still talking.
 
-When the last paragraph's timer finally expires (and no partial is currently being typed), the whole container is cleared and we apply a shader so it dissolves instead of popping out:
+When the last paragraph's timer finally expires (and no partial is currently being typed), the whole container is cleared and we [apply a shader](https://drawnui.net/articles/shaders.html) so it dissolves instead of popping out:
 
 ```csharp
 void AnimateOut(SkiaControl control)
@@ -518,10 +519,19 @@ void AnimateOut(SkiaControl control)
 		DurationMs = 400
 	};
 
+	animExit.Completed += (s, e) =>
+	{
+		control.VisualEffects.Remove(animExit);
+		control.DisposeObject(animExit);
+		control.IsVisible = false;
+	};
+
 	control.VisualEffects.Add(animExit);
 	animExit.Play();
 }
 ```
+
+The full version in `FrameOverlay.cs` also cancels any in-flight exit animation before starting a new one, so rapid ON/OFF toggles don't stack effects on the panel.
 
 Since the same overlay handles both preview and recording, captions stay visible live and are burned into the final video with no second export pass. The only layout difference is where they sit: centered during preview so the app HUD does not cover them, then bottom-aligned in the recorded output.
 
@@ -535,10 +545,11 @@ If you build something cool with it, let me know. I’d be happy to see it help 
 ## Links and resources
 
 - [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera) - SkiaCamera control repository with sample app and documentation
-- [Real-Time Camera Filters](../FiltersCamera/) - earlier post about using SKSL shaders with SkiaCamera
-- [Building a Real-time Audio Processing App](../SolTempo/) - earlier post about using SkiaCamera for audio
-- [DrawnUI for .NET MAUI](https://github.com/taublast/DrawnUi) - UI rendering engine behind this control
-- [SkiaSharp](https://github.com/mono/SkiaSharp) - the underlying 2D graphics library making this all possible
+- [DrawnUi.Maui.Demo](https://github.com/taublast/DrawnUi.Maui.Demo) - a XAML/MVVM example of using SkiaCamera for taking photos
+- [Real-Time Camera Filters](../FiltersCamera/) - earlier post about using SKSL shaders with SkiaCamera with example app
+- [Building a Real-time Audio Processing App](../SolTempo/) - earlier post about using SkiaCamera for audio with example app
+- [DrawnUI for .NET MAUI](https://github.com/taublast/DrawnUi) - rendering engine OSS repo behind this control
+- [SkiaSharp](https://github.com/mono/SkiaSharp) - the underlying 2D graphics library which made this all possible
 
 ---
 
