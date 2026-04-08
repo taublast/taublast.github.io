@@ -142,11 +142,14 @@ App UI presents three main parts:
 * Middle quick-control overlay with recording actions and a tappable capture thumbnail.
 * Bottom drawer provides large camera settings organized into three sections: `Input`, `Processing`, and `Output`.
 
-**TODO SCREENSHOT OF APP SETTINGS TAB**
-
 `Input` controls camera selection, capture format, and mode.
 `Processing` controls realtime work: monitoring, visualizers, gain, and speech recognition.
 `Output` controls what gets written: audio/video toggles, codec, pre-record settings, and geotagging.
+
+<img src="../assets/img/brio.jpg" alt="nput Settings on Windows" width="450"
+style="margin-top: 16px;" />
+
+*Input on Windows platform*
 
 That split makes the full pipeline visible in one place: input, processing, and encoded output.
 
@@ -368,7 +371,10 @@ _captionsEngine.CaptionsChanged += spans =>
 
 We marshal this callback to the UI thread because caption updates mutate DrawnUI controls (`SkiaRichLabel` text and visibility). Those updates must be serialized on the main thread to avoid cross-thread UI access issues.
 
-**TODO SCREENSHOT CAPTIONS**
+<img src="../assets/img/captions.jpg" alt="Encoded Captions" width="350"
+style="margin-top: 16px;" />
+
+*Recorded on Android, encoded captions, EQ and debug info*
 
 Captions are drawn as follow:
 
