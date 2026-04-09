@@ -29,6 +29,7 @@
   color: #edf5a0;
 }
 
+:is(html[data-mode], html:not([data-mode])) .highlight .m,
 :is(html[data-mode], html:not([data-mode])) .highlight .s,
 :is(html[data-mode], html:not([data-mode])) .highlight .s1,
 :is(html[data-mode], html:not([data-mode])) .highlight .sr,
@@ -40,12 +41,8 @@
   color: #cfcfcf;
 }
 
-:is(html[data-mode], html:not([data-mode])) .highlight .m{
-  color: #b2c993;
-}
-
 :is(html[data-mode], html:not([data-mode])) .highlight .n{
-  color: #8e8ac3;
+  color: #4ea56e;
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nv,
@@ -74,10 +71,13 @@ html:not([data-mode]), html[data-mode=dark] {
 --code-color: #acacac;
 }
 
-:is(html[data-mode], html:not([data-mode])) .highlight .nf,
 :is(html[data-mode], html:not([data-mode])) .highlight .nc,
 :is(html[data-mode], html:not([data-mode])) .highlight .fm {
   color: #79ad78;
+}
+
+:is(html[data-mode], html:not([data-mode])) .highlight .nf {
+  color: #4ea56e;
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .k,
