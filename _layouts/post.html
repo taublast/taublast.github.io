@@ -6,6 +6,8 @@ panel_includes:
 tail_includes:
   - related-posts
   - post-nav
+script_includes:
+  - comment
 ---
 
 {% include lang.html %}
@@ -99,10 +101,8 @@ tail_includes:
   </div>
 
   {% if page.comments and site.comments.provider %}
-    {% capture comments_include %}comments/{{ site.comments.provider }}.html{% endcapture %}
     <section class="post-comments">
       <div id="comments-wrapper"></div>
-      {% include {{ comments_include }} %}
     </section>
   {% endif %}
 
