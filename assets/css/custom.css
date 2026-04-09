@@ -1,80 +1,84 @@
 
-.gsc-reactions {
+.giscus {
   margin-top: 2rem;
 }
 
-.highlight .c,
-.highlight .c1,
-.highlight .cm,
-.highlight .cs {
+:is(html[data-mode], html:not([data-mode])) .highlight .c,
+:is(html[data-mode], html:not([data-mode])) .highlight .c1,
+:is(html[data-mode], html:not([data-mode])) .highlight .cm,
+:is(html[data-mode], html:not([data-mode])) .highlight .cs {
   color: #4fe34f;
 }
 
-.highlight .cp,
-.highlight .cpf {
+:is(html[data-mode], html:not([data-mode])) .highlight .cp,
+:is(html[data-mode], html:not([data-mode])) .highlight .cpf {
   color: #b8b8b8;
 }
 
-.highlight .s,
-.highlight .s2,
-.highlight .sa,
-.highlight .sb,
-.highlight .sc,
-.highlight .sd,
-.highlight .se,
-.highlight .sh,
-.highlight .si,
-.highlight .ss,
-.highlight .sx {
+:is(html[data-mode], html:not([data-mode])) .highlight .s,
+:is(html[data-mode], html:not([data-mode])) .highlight .s2,
+:is(html[data-mode], html:not([data-mode])) .highlight .sa,
+:is(html[data-mode], html:not([data-mode])) .highlight .sb,
+:is(html[data-mode], html:not([data-mode])) .highlight .sc,
+:is(html[data-mode], html:not([data-mode])) .highlight .sd,
+:is(html[data-mode], html:not([data-mode])) .highlight .se,
+:is(html[data-mode], html:not([data-mode])) .highlight .sh,
+:is(html[data-mode], html:not([data-mode])) .highlight .si,
+:is(html[data-mode], html:not([data-mode])) .highlight .ss,
+:is(html[data-mode], html:not([data-mode])) .highlight .sx {
   color: #edf5a0;
 }
 
-.highlight .s,
-.highlight .s1,
-.highlight .sr,
-.highlight .dl {
+:is(html[data-mode], html:not([data-mode])) .highlight .s,
+:is(html[data-mode], html:not([data-mode])) .highlight .s1,
+:is(html[data-mode], html:not([data-mode])) .highlight .sr,
+:is(html[data-mode], html:not([data-mode])) .highlight .dl {
   color: #c55656;
 }
 
-.highlight .p {
+.s {
+  color: #c55656;
+}
+
+:is(html[data-mode], html:not([data-mode])) .highlight .p {
   color: #cfcfcf;
 }
 
-.highlight .n,
-.highlight .nv,
-.highlight .nx,
-.highlight .py,
-.highlight .bp,
-.highlight .vc,
-.highlight .vg,
-.highlight .vi {
+:is(html[data-mode], html:not([data-mode])) .highlight .n,
+:is(html[data-mode], html:not([data-mode])) .highlight .nv,
+:is(html[data-mode], html:not([data-mode])) .highlight .nx,
+:is(html[data-mode], html:not([data-mode])) .highlight .py,
+:is(html[data-mode], html:not([data-mode])) .highlight .bp,
+:is(html[data-mode], html:not([data-mode])) .highlight .vc,
+:is(html[data-mode], html:not([data-mode])) .highlight .vg,
+:is(html[data-mode], html:not([data-mode])) .highlight .vi {
   color: #dfdfdf;
 }
 
-.highlight .nn {
+:is(html[data-mode], html:not([data-mode])) .highlight .nn {
   color: #dfdfdf;
 }
 
-.highlight .nt {
+:is(html[data-mode], html:not([data-mode])) .highlight .nt {
   color: #9cdcfe;
 }
 
-.highlight .na {
+:is(html[data-mode], html:not([data-mode])) .highlight .na {
   color: #dfdfdf;
 }
 
-.highlight .nf,
-.highlight .fm {
+:is(html[data-mode], html:not([data-mode])) .highlight .nf,
+:is(html[data-mode], html:not([data-mode])) .highlight .fm {
   color: #f9ffb4;
 }
 
-.highlight .k,
-.highlight .kc,
-.highlight .kd,
-.highlight .kn,
-.highlight .kp,
-.highlight .kr,
-.highlight .kt,
-.highlight .ow {
+:is(html[data-mode], html:not([data-mode])) .highlight .k,
+:is(html[data-mode], html:not([data-mode])) .highlight .kc,
+:is(html[data-mode], html:not([data-mode])) .highlight .kd,
+:is(html[data-mode], html:not([data-mode])) .highlight .kn,
+:is(html[data-mode], html:not([data-mode])) .highlight .kp,
+:is(html[data-mode], html:not([data-mode])) .highlight .kr,
+:is(html[data-mode], html:not([data-mode])) .highlight .kt,
+:is(html[data-mode], html:not([data-mode])) .highlight .ow {
   color: #e2dc29;
 }
