@@ -560,7 +560,7 @@ If you build something cool with it, please let me know. I’d be happy to see t
 
 ---
 
-*The author is available for consulting and works on drawn applications and custom controls for .NET MAUI. If you need help creating custom UIs, optimizing performance or building mobile apps, feel free to reach out.*
+*The author is available for consulting and works on drawn applications and custom controls for .NET MAUI. If you need help custom UI experiences, optimizing performance or building drawn mobile apps, feel free to reach out.*
 
 
 <style>
