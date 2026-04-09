@@ -16,6 +16,10 @@
   color: #b8b8b8;
 }
 
+:is(html[data-mode], html:not([data-mode])) .highlight .m {
+  color: #f17d44;
+}
+
 :is(html[data-mode], html:not([data-mode])) .highlight .s,
 :is(html[data-mode], html:not([data-mode])) .highlight .s2,
 :is(html[data-mode], html:not([data-mode])) .highlight .sa,
@@ -43,7 +47,7 @@
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .n{
-  color: #948aa3;
+  color: #908aa3;
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nv,
@@ -78,7 +82,7 @@ html:not([data-mode]), html[data-mode=dark] {
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nf {
-  color: #55b995;
+  color: #b1b1b1;
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .k,
