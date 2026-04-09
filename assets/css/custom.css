@@ -40,8 +40,12 @@
   color: #cfcfcf;
 }
 
+:is(html[data-mode], html:not([data-mode])) .highlight .m{
+  color: #b2c993;
+}
+
 :is(html[data-mode], html:not([data-mode])) .highlight .n{
-  color: #2fb89a;
+  color: #dfdfdf;
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nv,
@@ -64,6 +68,10 @@
 
 :is(html[data-mode], html:not([data-mode])) .highlight .na {
   color: #dfdfdf;
+}
+
+html:not([data-mode]), html[data-mode=dark] {
+--code-color: #dfdfdf;
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nf,
