@@ -265,6 +265,8 @@ Pre-recording solves this by running a silent circular buffer in memory continuo
 
 Works equally well for sports, family moments, wildlife - anything where you can't predict when live action starts.
 
+That also maps to a security camera pattern: AI or motion detection triggers live recording, the buffer guarantees the seconds before the event are already there - no continuous disk writes, no gigabytes of idle footage.
+
 Enable it:
 
 ```csharp
@@ -385,7 +387,7 @@ Because every frame passes through Skia before encoding, SKSL effects can be app
 
 The sample app exposes a `VideoEffect` helper property on `AppCamera`:
 
-**TODO SCREENSHOT OF FILTER EXAMPLE**
+**TODO VIDEO OF FILTERS EXAMPLE**
 
 ```csharp
 CameraControl.VideoEffect = ShaderEffect.Movie;
