@@ -100,12 +100,6 @@ script_includes:
     {{ content }}
   </div>
 
-  {% if page.comments and site.comments.provider %}
-    <section class="post-comments">
-      <div id="comments-wrapper"></div>
-    </section>
-  {% endif %}
-
   <div class="post-tail-wrapper text-muted">
     <!-- categories -->
     {% if page.categories.size > 0 %}
@@ -131,6 +125,12 @@ script_includes:
           </a>
         {% endfor %}
       </div>
+    {% endif %}
+
+    {% if page.comments and site.comments.provider %}
+      <section class="post-comments">
+        <div id="comments-wrapper"></div>
+      </section>
     {% endif %}
 
     <div
