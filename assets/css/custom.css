@@ -1,13 +1,3 @@
----
----
-
-
-/* prettier-ignore */
-@use 'main
-{%- if jekyll.environment == 'production' -%}
-  .bundle
-{%- endif -%}
-';
 
 .gsc-reactions {
   margin-top: 2rem;
