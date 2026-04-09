@@ -1,18 +1,97 @@
-@import 'main';
+---
+---
 
- 
+/* prettier-ignore */
+@use 'main
+{%- if jekyll.environment == 'production' -%}
+  .bundle
+{%- endif -%}
+';
+
+/* append your custom style below */
+
 .gsc-reactions {
 margin-top: 2rem;
 }
 
-//code comments
-.c1 {
-  color: green;
+.gsc-reactions {
+  margin-top: 2rem;
 }
 
-//code string
-.s {
-color: #c55656;
+//rouge code 
+
+.highlight .c,
+.highlight .c1,
+.highlight .cm,
+.highlight .cs {
+  color: #4fe34f;
 }
 
- 
+.highlight .cp,
+.highlight .cpf {
+  color: #b8b8b8;
+}
+
+.highlight .s,
+.highlight .s2,
+.highlight .sa,
+.highlight .sb,
+.highlight .sc,
+.highlight .sd,
+.highlight .se,
+.highlight .sh,
+.highlight .si,
+.highlight .ss,
+.highlight .sx {
+  color: #edf5a0;
+}
+
+.highlight .s,
+.highlight .s1,
+.highlight .sr,
+.highlight .dl {
+  color: #c55656;
+}
+
+.highlight .p {
+  color: #cfcfcf;
+}
+
+.highlight .n,
+.highlight .nv,
+.highlight .nx,
+.highlight .py,
+.highlight .bp,
+.highlight .vc,
+.highlight .vg,
+.highlight .vi {
+  color: #dfdfdf;
+}
+
+.highlight .nn {
+  color: #dfdfdf;
+}
+
+.highlight .nt {
+  color: #9cdcfe;
+}
+
+.highlight .na {
+  color: #dfdfdf;
+}
+
+.highlight .nf,
+.highlight .fm {
+  color: #f9ffb4;
+}
+
+.highlight .k,
+.highlight .kc,
+.highlight .kd,
+.highlight .kn,
+.highlight .kp,
+.highlight .kr,
+.highlight .kt,
+.highlight .ow {
+  color: #e2dc29;
+}
