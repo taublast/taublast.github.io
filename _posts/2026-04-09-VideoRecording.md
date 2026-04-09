@@ -39,11 +39,19 @@ We will focus on the control installation and the sample app which comes along w
 - Live video processing, SKSL shaders
 - Pre-recording (look-back capture)
 
-**TODO VIDEO OF APP**
-
 For a quick visual pass you can run the sample app on mobile or even your Windows or Mac machine if you have a camera attached!
 
 The [previous article](../SolTempo) covers the audio processing side of the pipeline.
+
+<div class="video-container-github">
+<video controls muted autoplay loop playsinline>
+  <source src="../../assets/vids/formula.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+</div>
+
+*Recorded video on iPhone with Noir filter and encoded realt-time EQ and AI-captions*
+
 
 ## Control Setup
 
@@ -184,16 +192,21 @@ App UI presents three main parts:
 * Middle quick-control overlay with recording actions and a tappable capture thumbnail.
 * Bottom drawer provides large camera settings organized into three sections: `Input`, `Processing`, and `Output`.
 
+<div class="video-container-github">
+<video controls muted autoplay loop playsinline>
+  <source src="../../assets/vids/videofilters.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+</div>
+
+*Switching video filters on iPhone, pointed to Youtube video on laptop screen*
+
 `Input` controls camera selection, capture format, and mode.
 `Processing` controls realtime work: monitoring, visualizers, gain, and speech recognition.
 `Output` controls what gets written: audio/video toggles, codec, pre-record settings, and geotagging.
 
-<img src="../assets/img/brio.jpg" alt="Input Settings on Windows" width="450"
-style="margin-top: 16px;" />
-
-*Input on Windows platform*
-
 That split makes the full pipeline visible in one place: input, processing, and encoded output.
+
 
 For this article, the flow is simple: keep realtime processing on, feed live audio into overlay and speech paths, then record the composed result directly into the saved video.
 
@@ -257,9 +270,9 @@ await CameraControl.StopVideoRecording(true);
 
 which discards the recording instead of finalizing it.
 
-## Pre-Recording: Look-Back Capture
+## Pre-Recording: Look-Back
 
-Most recording apps miss the moment. Something happens, you tap record - but the time before that tap is gone.
+Sometimes we apps miss the moment. Something happens, we tap record - but the time before that tap is gone.
 
 Pre-recording solves this by running a silent circular buffer in memory continuously. Encoded frames keep flowing in and old ones drop off the tail. When you trigger live recording, the buffered segment is prepended to the file before the live feed. The final video contains both - no gap, no cut, no transition artifact.
 
@@ -267,7 +280,7 @@ Works equally well for sports, family moments, wildlife - anything where you can
 
 That also maps to a security camera pattern: AI or motion detection triggers live recording, the buffer guarantees the seconds before the event are already there - no continuous disk writes, no gigabytes of idle footage.
 
-Enable it:
+To enable:
 
 ```csharp
 CameraControl.EnablePreRecording = true;
@@ -284,47 +297,51 @@ Both `IsPreRecording` and `IsRecording` are bindable, so record button state, la
 
 For the full breakdown of the muxing flow see [PreRecording.md](https://github.com/taublast/DrawnUi.Maui.Camera/blob/main/PreRecording.md).
 
-## GPS and Metadata
+## SKSL Video Filters 
 
-Enable location tagging with one flag:
+We apply video filters, implemented with SKSL shaders to preview, captured photo and captured video.
+
+Because every frame passes through Skia before encoding, SKSL effects can be applied to recorded video in real-time. The saved MP4 will contain filtered frames, no post-processing needed.
+
+The sample app exposes a `VideoEffect` helper property on `AppCamera`:
 
 ```csharp
-InjectGpsLocation = true;
+CameraControl.VideoEffect = ShaderEffect.Movie;
 ```
 
-Call `RefreshGpsLocation` when the camera turns on so coordinates are fresh before recording starts:
+`AppCamera` overrides both `RenderPreviewForProcessing` and `RenderFrameForRecording` to apply the selected shader effect before handing frames to preview or encoder. Same effect, same path, different target.
+
+Switch to `ShaderEffect.None` and you are back to clean capture. Switch mid-session and the filter change shows up in the file from that point forward.
+
+Captured still photo is processed before saving to gallery on GPU thread:
 
 ```csharp
-if (CameraControl.InjectGpsLocation)
-    _ = CameraControl.RefreshGpsLocation();
-```
-
-GPS is then embedded automatically - into the MP4 container for video, and into EXIF for photos. You don't touch the coordinates in your callbacks; they're already there.
-
-For video you can still stamp branding fields into the container metadata:
-
-```csharp
-// CameraControl.RecordingSuccess += OnRecordingSuccess;
-private async void OnRecordingSuccess(object sender, CapturedVideo capturedVideo)
-{
-	capturedVideo.Meta.Vendor = "Me";
-	capturedVideo.Meta.Software = "My App";
-	var publicPath = await CameraControl.MoveVideoToGalleryAsync(capturedVideo, MauiProgram.Album);
-}
-```
-
-Photos get the full EXIF treatment: ISO, shutter speed, aperture, focal length, orientation, GPS, timestamp, software, vendor, model. The `Metadata` model exposes all of it before you save:
-
-```csharp
-// CameraControl.CaptureSuccess += OnCaptureSuccess;
 private async void OnCaptureSuccess(object sender, CapturedImage captured)
 {
-	captured.Meta.Software = "My App";
-	var path = await CameraControl.SaveToGalleryAsync(captured, "MyAppAlbum");
+	if (CameraControl.UseRealtimeVideoProcessing && CameraControl.VideoEffect != ShaderEffect.None)
+	{
+		var imageWithEffect = await CameraControl.RenderCapturedPhotoAsync(captured, null, image =>
+		{
+				var shaderEffect = new SkiaShaderEffect()
+				{
+					ShaderSource = ShaderEffectHelper.GetFilename(CameraControl.VideoEffect),
+				};
+				image.VisualEffects.Add(shaderEffect);
+		}, true);
+
+		captured.Image.Dispose();
+		captured.Image = imageWithEffect;
+	}
+
+	SaveFinalPhotoInBackground(captured);
 }
 ```
 
-Whether GPS is displayed depends on the gallery or player reading the file, but the data is in there.
+This is from `MainPage.OnCaptureSuccess` in the sample app.
+
+The sample ships with several SKSL presets to play with, and adding your own is a matter of writing a standard SKSL fragment shader.
+
+Shader assets live in the sample under `src/Sample/Resources/Raw/Shaders`.
 
 ## Drawn Overlay
 
@@ -379,66 +396,24 @@ In `AppCamera.DrawOverlay`, we adapt both by mode and scale.
 
 >To know the camera control location on the SkiaSharp canvas we can use camera property `SKRect DrawingRect`. When property `Aspect` is not set to `Fill` but rather to `Fit` we could have "black bars" around the real displayed frame, but then we can use `SKRect DisplayRect` property to get exact area where rescaled preview is drawn on the canvas.
 
-## SKSL Video Filters 
-
-We apply video filters, implemented with SKSL shaders to preview, captured photo and captured video.
-
-Because every frame passes through Skia before encoding, SKSL effects can be applied to recorded video in real-time. The saved MP4 will contain filtered frames, no post-processing needed.
-
-The sample app exposes a `VideoEffect` helper property on `AppCamera`:
-
-**TODO VIDEO OF FILTERS EXAMPLE**
-
-```csharp
-CameraControl.VideoEffect = ShaderEffect.Movie;
-```
-
-`AppCamera` overrides both `RenderPreviewForProcessing` and `RenderFrameForRecording` to apply the selected shader effect before handing frames to preview or encoder. Same effect, same path, different target.
-
-Switch to `ShaderEffect.None` and you are back to clean capture. Switch mid-session and the filter change shows up in the file from that point forward.
-
-Captured still photo is processed before saving to gallery on GPU thread:
-
-```csharp
-private async void OnCaptureSuccess(object sender, CapturedImage captured)
-{
-	if (CameraControl.UseRealtimeVideoProcessing && CameraControl.VideoEffect != ShaderEffect.None)
-	{
-		var imageWithEffect = await CameraControl.RenderCapturedPhotoAsync(captured, null, image =>
-		{
-				var shaderEffect = new SkiaShaderEffect()
-				{
-					ShaderSource = ShaderEffectHelper.GetFilename(CameraControl.VideoEffect),
-				};
-				image.VisualEffects.Add(shaderEffect);
-		}, true);
-
-		captured.Image.Dispose();
-		captured.Image = imageWithEffect;
-	}
-
-	SaveFinalPhotoInBackground(captured);
-}
-```
-
-This is from `MainPage.OnCaptureSuccess` in the sample app.
-
-The sample ships with several SKSL presets to play with, and adding your own is a matter of writing a standard SKSL fragment shader.
-
-Shader assets live in the sample under `src/Sample/Resources/Raw/Shaders`.
-
 ## AI Speech Captions
 
-In the next article we will surely feed video data to ML to detect faces in realtime. Today let's feed audio to AI. Our sample transcribes speech through **OpenAI Whisper** (`whisper-1` model) via the `https://api.openai.com/v1/audio/transcriptions` endpoint. The service lives in `src/Sample/Services/OpenAi/OpenAiAudioTranscriptionService.cs`.
+In an upcoming article we will detect faces in realtime, today let's transcribe speech with the help of **OpenAI Whisper** model and encode captions into the final video in real-time.  
+Service lives in `src/Sample/Services/OpenAi/OpenAiAudioTranscriptionService.cs`.
 
-Real-time speech transcription is wired like this:
+<img src="../assets/img/captions.jpg" alt="Nick Kovalsky" width="350"
+style="margin-top: 16px;" />
+
+*Author testing captions on Android, frame from a final video with debug info*
+
+In the [previous article](../SolTempo/) we talked in detail about how to get audio from `SkiaCamera`. Let's wire transcription like this:
 
 ```csharp
 CameraControl.AudioSampleAvailable += (data, rate, bits, channels)
     => OnAudioCaptured(data, rate, bits, channels);
 ```
 
-We feed incoming PCM into the transcription service:
+Then feed incoming PCM into the service:
 
 ```csharp
 private void OnAudioCaptured(byte[] data, int rate, int bits, int channels)
@@ -458,15 +433,15 @@ private void OnAudioCaptured(byte[] data, int rate, int bits, int channels)
 }
 ```
 
-To enable AI captions, open `src/Sample/Secrets.cs` and paste your OpenAI key:
+To enable AI captions for your compiled sample, open `src/Sample/Secrets.cs` and paste your OpenAI key:
 
 ```csharp
 public static string OpenAiKey = "sk-...";
 ```
 
-Without a key the sample compiles and runs normally - AI captions are simply disabled.
+Without a key the sample compiles and runs normally but AI captions will be disabled.
 
-We can draw received text onto our overlay:
+We wire received text onto our frame overlay like this:
 
 ```csharp
 _captionsEngine.CaptionsChanged += spans =>
@@ -474,14 +449,7 @@ _captionsEngine.CaptionsChanged += spans =>
         => _previewFrameOverlay.SetCaptions(spans));
 ```
 
-We marshal this callback to the UI thread because caption updates mutate DrawnUI controls (`SkiaRichLabel` text and visibility). Those updates must be serialized on the main thread to avoid cross-thread UI access issues.
-
-<img src="../assets/img/captions.jpg" alt="Encoded Captions" width="350"
-style="margin-top: 16px;" />
-
-*Recorded on Android, encoded captions, EQ and debug info*
-
-Captions are drawn like this:
+Since all video frames come to us in a form of a SkiaSharp canvas we comfortably draw captions with DrawnU:
 
 ```csharp
 new SkiaShape()
@@ -507,9 +475,7 @@ new SkiaShape()
 }
 ```
 
-Caption lifetime is managed by `RealtimeCaptionsEngine` as a rolling window. Each finalized paragraph is kept until either a newer paragraph pushes it past `maxLines` (3 by default), or the most recently added paragraph's timer expires. Older paragraphs are no longer removed individually on a per-line timer — they only roll off when displaced, which keeps the visible history stable while the user is still talking.
-
-When the last paragraph's timer finally expires (and no partial is currently being typed), the whole container is cleared and we [apply a shader](https://drawnui.net/articles/shaders.html) so it dissolves instead of popping out:
+Captions are managed by `RealtimeCaptionsEngine`. Each paragraph is kept until either a newer paragraph is pushed, or the most recently added paragraph's timer expires. When the last paragraph's timer finally expires, we [apply a shader](https://drawnui.net/articles/shaders.html) to dissolve it with a nice effect:
 
 ```csharp
 void AnimateOut(SkiaControl control)
@@ -537,12 +503,51 @@ The full version in `FrameOverlay.cs` also cancels any in-flight exit animation 
 
 Since the same overlay handles both preview and recording, captions stay visible live and are burned into the final video with no second export pass. The only layout difference is where they sit: centered during preview so the app HUD does not cover them, then bottom-aligned in the recorded output.
 
+## GPS and Metadata
+
+You can enable location tagging with one flag:
+
+```csharp
+InjectGpsLocation = true;
+```
+
+Call `RefreshGpsLocation` when the camera turns on so coordinates are fresh before recording starts:
+
+```csharp
+if (CameraControl.InjectGpsLocation)
+    _ = CameraControl.RefreshGpsLocation();
+```
+
+GPS is then embedded automatically - into the MP4 container for video, and into EXIF for photos. No need to set the coordinates manually, they're already there. Note that whether GPS is displayed depends on the gallery or player reading the file.
+
+For video you can also stamp branding fields into the container metadata:
+
+```csharp
+// CameraControl.RecordingSuccess += OnRecordingSuccess;
+private async void OnRecordingSuccess(object sender, CapturedVideo capturedVideo)
+{
+	capturedVideo.Meta.Vendor = "Me";
+	capturedVideo.Meta.Software = "My App";
+	var publicPath = await CameraControl.MoveVideoToGalleryAsync(capturedVideo, MauiProgram.Album);
+}
+```
+
+Captured photos get the full EXIF treatment: ISO, shutter speed, aperture, focal length, orientation, GPS, timestamp, software, vendor, model. The `Metadata` model exposes all of it before you save:
+
+```csharp
+// CameraControl.CaptureSuccess += OnCaptureSuccess;
+private async void OnCaptureSuccess(object sender, CapturedImage captured)
+{
+	captured.Meta.Software = "My App";
+	var path = await CameraControl.SaveToGalleryAsync(captured, "MyAppAlbum");
+}
+```
 
 ## Final thoughts
 
 If your app needs branded recording, AI-assisted media, sports telemetry, guided capture, captions, or audio-reactive overlays, this control is designed for that class of workflow.
 
-If you build something cool with it, let me know. I’d be happy to see it help other builders too. PRs are welcome!
+If you build something cool with it, please let me know. I’d be happy to see this work was helpful to the others. PRs are also welcome!
 
 ## Links and resources
 
@@ -555,5 +560,38 @@ If you build something cool with it, let me know. I’d be happy to see it help 
 
 ---
 
- *The author is available for consulting and works on drawn applications and custom controls for .NET MAUI. If you need help creating custom UI experiences, optimizing performance, or building entirely drawn apps, feel free to reach out.*
+*The author is available for consulting and works on drawn applications and custom controls for .NET MAUI. If you need help creating custom UIs, optimizing performance or building mobile apps, feel free to reach out.*
 
+
+<style>
+
+.video-container {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
+  margin-bottom: 1em;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.video-container-github {
+    min-height: 200px;
+    margin-bottom: 1em;
+}
+
+.video-container-github video {
+  max-height: 547px;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+</style>
