@@ -42,7 +42,7 @@
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .n{
-  color: #a58cab;
+  color: #b792b4;
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nv,
@@ -77,7 +77,7 @@ html:not([data-mode]), html[data-mode=dark] {
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nf {
-  color: #4ea56e;
+  color: #58a574;
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .k,
