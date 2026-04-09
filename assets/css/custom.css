@@ -34,7 +34,7 @@
 :is(html[data-mode], html:not([data-mode])) .highlight .s1,
 :is(html[data-mode], html:not([data-mode])) .highlight .sr,
 :is(html[data-mode], html:not([data-mode])) .highlight .dl {
-  color: #c55656;
+  color: #d38383;
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .p {
@@ -42,7 +42,7 @@
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .n{
-  color: #4ea56e;
+  color: #a58cab;
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nv,
@@ -88,5 +88,5 @@ html:not([data-mode]), html[data-mode=dark] {
 :is(html[data-mode], html:not([data-mode])) .highlight .kr,
 :is(html[data-mode], html:not([data-mode])) .highlight .kt,
 :is(html[data-mode], html:not([data-mode])) .highlight .ow {
-  color: #e2dc29;
+  color: #a99565;
 }
