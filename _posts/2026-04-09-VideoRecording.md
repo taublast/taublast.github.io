@@ -268,11 +268,11 @@ which discards the recording instead of finalizing it.
 
 Sometimes we apps miss the moment. Something happens, we tap record - but the time before that tap is gone.
 
-Pre-recording solves this by running a silent circular buffer in memory continuously. Encoded frames keep flowing in and old ones drop off the tail. When you trigger live recording, the buffered segment is prepended to the file before the live feed. The final video contains both - no gap, no cut, no transition artifact.
+Pre-recording solves this by running a silent circular buffer in memory continuously. Encoded frames keep flowing in and old ones drop off the tail. When you trigger live recording, camera will prepend several seconds preceeding it to the final feed.
 
 Works equally well for sports, family moments, wildlife - anything where you can't predict when live action starts.
 
-That also maps to a security camera pattern: AI or motion detection triggers live recording, the buffer guarantees the seconds before the event are already there - no continuous disk writes, no gigabytes of idle footage.
+Imagine a security camera pattern: AI or motion detection triggers live recording, the buffer guarantees the seconds before the event are already there - no continuous disk writes, no gigabytes of idle footage.
 
 To enable:
 
@@ -281,7 +281,7 @@ CameraControl.EnablePreRecording = true;
 CameraControl.PreRecordDuration = TimeSpan.FromSeconds(5);
 ```
 
-The buffer runs silently in the background from that point on. When the user triggers recording, those last 5 seconds are already there. To abort and discard instead of saving:
+First `Start()` triggers pre-recording, buffer starts to run from that point on. The next `Start()` call will trigger live recording, and last seconds preceeding this are kept. At any point, to abort and discard instead of saving:
 
 ```csharp
 await CameraControl.StopVideoRecording(true); // true = discard
