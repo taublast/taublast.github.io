@@ -39,7 +39,9 @@ We will focus on the control installation and the sample app which comes along w
 - Live video processing, SKSL shaders
 - Pre-recording (look-back capture)
 
-For a quick visual pass you can run the sample app on mobile or even your Windows or Mac machine if you have a camera attached!
+ Another article to come will show us *how to use SkiaCamera for live ML face detection* and solve other scenarios where we need to send frames to AI/ML.
+
+For a quick visual pass on this one you can run the sample app on mobile or even your Windows or Mac machine if you have a camera attached!
 
 <div class="video-container-github">
 <video controls muted autoplay loop playsinline>
