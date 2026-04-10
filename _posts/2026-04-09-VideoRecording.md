@@ -174,7 +174,7 @@ Canvas.WillFirstTimeDraw += (sender, context) =>
 };
 ```
 
-If you have a dedicated camera page, you can also flip `IsOn` from your page lifecycle hook. The exact hook depends on your navigation setup.
+If you have a dedicated camera page, you can also flip `IsOn` from your page lifecycle hook. The exact hook depends on your navigation setup. I would recommend to use the nuget [LightNavigation](https://github.com/taublast/LightNavigation), you get nice hooks like `OnTopmost()` - can turn camera on, `OnCovered` - turn it off, `OnRemoved` - time to dispose everything properly. Might also want to have it inside a popup: [FastPopups][https://github.com/taublast/FastPopups] would help.
 
 When the app goes to background, camera state is suspended and restored on resume without extra wiring in most cases.
 
