@@ -3,21 +3,125 @@
   margin-top: 2rem;
 }
 
+:root {
+  --rouge-comment: #389d33;
+  --rouge-string: #d95f74;
+  --rouge-tag: #64b1a3;
+  --rouge-class: #64b1a3;
+  --rouge-function: #64b1a3;
+  --rouge-keyword: #d5cc50;
+  --rouge-string-escape: #d5cc50;
+  --rouge-number-muted: #797979;
+  --rouge-number: #dfd6c5;
+  --rouge-punctuation: #ece2ce;
+  --rouge-name: #cbcbcb;
+  --rouge-plain: #cbcbcb;
+  --rouge-code: #e9deca;
+  --rouge-surface: #050607;
+  --rouge-surface-raised: #0a0c0d;
+  --rouge-gutter: #080a0b;
+  --rouge-border: #15191b;
+  --rouge-divider: #23282b;
+  --rouge-gutter-text: #556067;
+  --rouge-label: #909aa2;
+  --rouge-shadow: rgba(0, 0, 0, 0.42);
+}
+
+
+
+.highlighter-rouge {
+    color: #8dc9ff;
+}
+
+code, kbd, pre, samp {
+    font-family: Arial;
+    font-size: 1em;
+}
+
+html:not([data-mode]), html[data-mode=dark] {
+  --code-color: var(--rouge-code);
+  --link-color: #94b6d5;
+  --link-underline-color: #94b6d5;
+}
+
+html:not([data-mode]) div.highlighter-rouge,
+html[data-mode=dark] div.highlighter-rouge {
+  background: var(--rouge-surface);
+  border: 1px solid var(--rouge-border);
+  border-radius: 18px;
+  box-shadow: 0 18px 38px var(--rouge-shadow);
+  overflow: hidden;
+}
+
+html:not([data-mode]) div.highlighter-rouge > .code-header,
+html[data-mode=dark] div.highlighter-rouge > .code-header {
+  align-items: center;
+  background: linear-gradient(180deg, #0d1011 0%, var(--rouge-surface-raised) 100%);
+  border-bottom: 1px solid var(--rouge-border);
+  color: var(--rouge-label);
+}
+
+html:not([data-mode]) div.highlighter-rouge > .code-header span,
+html[data-mode=dark] div.highlighter-rouge > .code-header span {
+  color: var(--rouge-label);
+  letter-spacing: 0.06em;
+}
+
+html:not([data-mode]) div.highlighter-rouge > .code-header button,
+html[data-mode=dark] div.highlighter-rouge > .code-header button {
+  border-left: 1px solid var(--rouge-border);
+  color: var(--rouge-label);
+}
+
+html:not([data-mode]) div.highlighter-rouge > .code-header button:hover,
+html[data-mode=dark] div.highlighter-rouge > .code-header button:hover {
+  color: var(--rouge-class);
+}
+
+html:not([data-mode]) div.highlighter-rouge > .highlight,
+html:not([data-mode]) div.highlighter-rouge > .highlight code,
+html:not([data-mode]) div.highlighter-rouge > .highlight pre,
+html:not([data-mode]) div.highlighter-rouge > .highlight table,
+html:not([data-mode]) div.highlighter-rouge > .highlight td,
+html[data-mode=dark] div.highlighter-rouge > .highlight,
+html[data-mode=dark] div.highlighter-rouge > .highlight code,
+html[data-mode=dark] div.highlighter-rouge > .highlight pre,
+html[data-mode=dark] div.highlighter-rouge > .highlight table,
+html[data-mode=dark] div.highlighter-rouge > .highlight td {
+  background: transparent;
+}
+
+html:not([data-mode]) div.highlighter-rouge .rouge-gutter,
+html[data-mode=dark] div.highlighter-rouge .rouge-gutter {
+  background: var(--rouge-gutter);
+  border-right: 1px solid var(--rouge-divider);
+}
+
+html:not([data-mode]) div.highlighter-rouge .rouge-gutter pre,
+html[data-mode=dark] div.highlighter-rouge .rouge-gutter pre {
+  color: var(--rouge-gutter-text);
+}
+
+html:not([data-mode]) div.highlighter-rouge .rouge-code pre,
+html[data-mode=dark] div.highlighter-rouge .rouge-code pre {
+  color: var(--rouge-plain);
+}
+
 :is(html[data-mode], html:not([data-mode])) .highlight .c,
 :is(html[data-mode], html:not([data-mode])) .highlight .c1,
 :is(html[data-mode], html:not([data-mode])) .highlight .cm,
 :is(html[data-mode], html:not([data-mode])) .highlight .cs {
-  color: #2b652b;
+  color: var(--rouge-comment);
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .m,
 :is(html[data-mode], html:not([data-mode])) .highlight .cp,
 :is(html[data-mode], html:not([data-mode])) .highlight .cpf {
-  color: #b8b8b8;
+  color: var(--rouge-number-muted);
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .m {
-  color: #f17d44;
+  color: var(--rouge-number);
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .s,
@@ -31,7 +135,7 @@
 :is(html[data-mode], html:not([data-mode])) .highlight .si,
 :is(html[data-mode], html:not([data-mode])) .highlight .ss,
 :is(html[data-mode], html:not([data-mode])) .highlight .sx {
-  color: #edf5a0;
+  color: var(--rouge-string-escape);
 }
 
 
@@ -39,15 +143,15 @@
 :is(html[data-mode], html:not([data-mode])) .highlight .s1,
 :is(html[data-mode], html:not([data-mode])) .highlight .sr,
 :is(html[data-mode], html:not([data-mode])) .highlight .dl {
-  color: #d38383;
+  color: var(--rouge-string);
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .p {
-  color: #cfcfcf;
+  color: var(--rouge-punctuation);
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .n{
-  color: #9491bb;
+  color: var(--rouge-name);
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nv,
@@ -57,32 +161,28 @@
 :is(html[data-mode], html:not([data-mode])) .highlight .vc,
 :is(html[data-mode], html:not([data-mode])) .highlight .vg,
 :is(html[data-mode], html:not([data-mode])) .highlight .vi {
-  color: #dfdfdf;
+  color: var(--rouge-plain);
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nn {
-  color: #dfdfdf;
+  color: var(--rouge-plain);
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nt {
-  color: #5582a3;
+  color: var(--rouge-tag);
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .na {
-  color: #dfdfdf;
-}
-
-html:not([data-mode]), html[data-mode=dark] {
---code-color: #acacac;
+  color: var(--rouge-plain);
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nc,
 :is(html[data-mode], html:not([data-mode])) .highlight .fm {
-  color: #55b995;
+  color: var(--rouge-class);
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .nf {
-  color: #b1b1b1;
+  color: var(--rouge-function);
 }
 
 :is(html[data-mode], html:not([data-mode])) .highlight .k,
@@ -93,5 +193,5 @@ html:not([data-mode]), html[data-mode=dark] {
 :is(html[data-mode], html:not([data-mode])) .highlight .kr,
 :is(html[data-mode], html:not([data-mode])) .highlight .kt,
 :is(html[data-mode], html:not([data-mode])) .highlight .ow {
-  color: #9d9a1f;
+  color: var(--rouge-keyword);
 }
