@@ -41,8 +41,6 @@ We will focus on the control installation and the sample app which comes along w
 
 For a quick visual pass you can run the sample app on mobile or even your Windows or Mac machine if you have a camera attached!
 
-The [previous article](../SolTempo) covers the audio processing side of the pipeline.
-
 <div class="video-container-github">
 <video controls muted autoplay loop playsinline>
   <source src="../../assets/vids/formula.mp4" type="video/mp4">
@@ -52,12 +50,13 @@ The [previous article](../SolTempo) covers the audio processing side of the pipe
 
 *Recorded video on iPhone with Noir filter and encoded realt-time EQ and AI-captions*
 
+The [previous article](../SolTempo) covers the audio processing side of the pipeline.
 
 ## Control Setup
 
 Full control docs entry point is the project [README](https://github.com/taublast/DrawnUi.Maui.Camera).
 
-To use `SkiaCamera` in a **.NET MAUI** app, install the package, initialize DrawnUI, then host the camera inside a hardware-accelerated Skia canvas.
+To use `SkiaCamera` in a **.NET MAUI** app, install the package, initialize DrawnUI, then host the camera inside a hardware-accelerated Skia canvas. [DrawnUI](https://drawnui.net) library provides us with high-level abstractions to comfortably draw and process graphics using SkiaSharp.
 
 ### Install:
 
