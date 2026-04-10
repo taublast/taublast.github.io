@@ -6,12 +6,12 @@
 :root {
   --rouge-comment: #389d33;
   --rouge-string: #e15a5a;
+  --rouge-number-muted: #e15a5a;
   --rouge-tag: #64b1a3;
   --rouge-class: #64b1a3;
   --rouge-function: #64b1a3;
   --rouge-keyword: #d5cc50;
   --rouge-string-escape: #d5cc50;
-  --rouge-number-muted: #797979;
   --rouge-number: #dfd6c5;
   --rouge-punctuation: #ece2ce;
   --rouge-name: #cbcbcb;
