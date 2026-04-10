@@ -40,7 +40,7 @@ code, kbd, pre, samp {
 
 html:not([data-mode]), html[data-mode=dark] {
   --code-color: var(--rouge-code);
-  --link-color: #839db5;
+  --link-color: #74bad1;
   --link-underline-color: #839db5;
 }
 
