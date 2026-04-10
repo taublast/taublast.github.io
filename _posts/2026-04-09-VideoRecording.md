@@ -204,11 +204,6 @@ App UI presents three main parts:
 `Processing` controls realtime work: monitoring, visualizers, gain, and speech recognition.
 `Output` controls what gets written: audio/video toggles, codec, pre-record settings, and geotagging.
 
-That split makes the full pipeline visible in one place: input, processing, and encoded output.
-
-
-For this article, the flow is simple: keep realtime processing on, feed live audio into overlay and speech paths, then record the composed result directly into the saved video.
-
 In the sample app, `SkiaCamera` is subclassed into `AppCamera` and configured for processed recording by default:
 
 ```csharp
@@ -219,7 +214,7 @@ public partial class AppCamera : SkiaCamera
 		NeedPermissionsSet = NeedPermissions.Camera | NeedPermissions.Gallery | NeedPermissions.Microphone;
 		InjectGpsLocation = true;
 
-		UseRealtimeVideoProcessing = true;
+		UseRealtimeVideoProcessing = true; // !!!
 		VideoQuality = VideoQuality.Standard;
 		EnableAudioRecording = true;
 
@@ -230,8 +225,7 @@ public partial class AppCamera : SkiaCamera
 ```
 
 `UseRealtimeVideoProcessing = true` is the key switch.
-Without it, recording is native and overlay is preview-only.
-With it, every frame goes through Skia before encoding, so anything drawn in `ProcessFrame` becomes part of the file.
+Without it, all the feed goes the shortest way. With it, every frame goes through our pipeline, so anything drawn in `ProcessFrame` becomes part of the file. `ProcessPreview` callback acts for preview mode. An important note: when we record we processing enabled, we see in preview the scaled down frame that went through processing and will be recorded to file. Using the principle "what you see is what you get recorded".
 
 Both handlers receive `DrawableFrame`: it carries the destination `SKCanvas`, source camera `SKImage`, current `Scale`, and `IsPreview` flag. That flag lets us render preview and recording differently when needed. In the sample we keep one shared overlay tree, keep EQ visible in both paths, and only move captions between preview and recording modes.
 
