@@ -229,6 +229,7 @@ Without it, all the feed goes the shortest way. With it, every frame goes throug
 
 Both handlers receive `DrawableFrame`: it carries the destination `SKCanvas`, source camera `SKImage`, current `Scale`, and `IsPreview` flag. That flag lets us render preview and recording differently when needed. In the sample we keep one shared overlay tree, keep EQ visible in both paths, and only move captions between preview and recording modes.
 
+Images that get there previously passed through `RenderPreviewForProcessing` and `RenderFrameForRecording` which create canvases to work on. You will see below how we used them to apply shaders serving as video filters.
 
 ## Video Recording
 
