@@ -5,7 +5,7 @@
 
 :root {
   --rouge-comment: #389d33;
-  --rouge-string: #d95f74;
+  --rouge-string: #e15a5a;
   --rouge-tag: #64b1a3;
   --rouge-class: #64b1a3;
   --rouge-function: #64b1a3;
@@ -40,8 +40,13 @@ code, kbd, pre, samp {
 
 html:not([data-mode]), html[data-mode=dark] {
   --code-color: var(--rouge-code);
-  --link-color: #94b6d5;
-  --link-underline-color: #94b6d5;
+  --link-color: #839db5;
+  --link-underline-color: #839db5;
+}
+
+#page-category a:hover, #page-tag a:hover, #access-lastmod a:hover, .post-tail-wrapper .license-wrapper>a:hover, #search-results a:hover, footer a:hover, #topbar #breadcrumb a:hover, .post-meta a:not([class]):hover, .content a:not(.img-link):hover {
+  color: #ff7676  !important;
+  border-bottom: 1px solid #ff7676 ;
 }
 
 html:not([data-mode]) div.highlighter-rouge,
