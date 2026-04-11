@@ -392,15 +392,24 @@ In `AppCamera.DrawOverlay`, we adapt both by mode and scale.
 
 ## AI Speech Captions
 
-In an upcoming article we will detect faces in realtime, today let's transcribe speech with the help of **OpenAI Whisper** model and encode captions into the final video in real-time.  
-Service lives in `src/Sample/Services/OpenAi/OpenAiAudioTranscriptionService.cs`.
+Let's transcribe speech with the help of **OpenAI** API and encode captions into the final video in real-time.  Service to deal with API is located inside `src/Sample/Services/OpenAi/OpenAiAudioTranscriptionService.cs`.
+
+To enable AI captions for your compiled sample, open `src/Sample/Secrets.cs` and paste your OpenAI key:
+
+```csharp
+public static string OpenAiKey = "sk-...";
+```
+
+Without a key the sample compiles and runs normally but AI captions will be disabled.
+
+In fact you might also want to convert speech to text locally without remote API. There are nice docs by Gerald Versluis to help you with this, they worked well for me: [for Android](https://www.youtube.com/watch?v=CI-Fx8_0oYo) and [for iOS](https://www.youtube.com/watch?v=kxUsmctDyko).
 
 <img src="../assets/img/captions.jpg" alt="Nick Kovalsky" width="350"
 style="margin-top: 16px;" />
 
 *Author testing captions on Android, frame from a final video with debug info*
 
-In the [previous article](../SolTempo/) we talked in detail about how to get audio from `SkiaCamera`. Let's wire transcription like this:
+In the [previous article](../SolTempo/) we already covered in detail how to get audio from `SkiaCamera`, so let's wire transcription like this:
 
 ```csharp
 CameraControl.AudioSampleAvailable += (data, rate, bits, channels)
@@ -425,22 +434,6 @@ private void OnAudioCaptured(byte[] data, int rate, int bits, int channels)
 		_realtimeTranscriptionService.FeedAudio(data);
 	}
 }
-```
-
-To enable AI captions for your compiled sample, open `src/Sample/Secrets.cs` and paste your OpenAI key:
-
-```csharp
-public static string OpenAiKey = "sk-...";
-```
-
-Without a key the sample compiles and runs normally but AI captions will be disabled.
-
-We wire received text onto our frame overlay like this:
-
-```csharp
-_captionsEngine.CaptionsChanged += spans =>
-	MainThread.BeginInvokeOnMainThread(()
-        => _previewFrameOverlay.SetCaptions(spans));
 ```
 
 Since all video frames come to us in a form of a SkiaSharp canvas we comfortably draw captions with DrawnU:
