@@ -335,9 +335,7 @@ private async void OnCaptureSuccess(object sender, CapturedImage captured)
 
 This is from `MainPage.OnCaptureSuccess` in the sample app.
 
-The sample ships with several SKSL presets to play with, and adding your own is a matter of writing a standard SKSL fragment shader.
-
-Shader assets live in the sample under `src/Sample/Resources/Raw/Shaders`.
+App ships with several SKSL presets, I took some shaders i was already using in one of the previous projects: [Camera with Filters](../FiltersCamera/). They live inside sample app resources: `src/Sample/Resources/Raw/Shaders`.
 
 ## Drawn Overlay
 
