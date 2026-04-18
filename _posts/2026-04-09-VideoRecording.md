@@ -5,7 +5,7 @@ description: "How to use SkiaCamera control in .NET MAUI for a video processing 
 date: 2026-04-09 12:00:00 +0000
 categories: [MAUI, DrawnUI, Camera, Video]
 tags: [dotnetmaui, skiasharp, camera, video, audio, realtime, drawnui]
-image: /assets/img/camhi.jpg
+image: /assets/img/camhi4.jpg
 ---
 
 ## DrawnUi.Maui.Camera

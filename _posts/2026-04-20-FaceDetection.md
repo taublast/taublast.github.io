@@ -5,42 +5,42 @@ description: "How to use SkiaCamera with AI/ML locally and with an API"
 date: 2026-04-11 12:00:00 +0000
 categories: [MAUI, DrawnUI, Camera, AI]
 tags: [dotnetmaui, skiasharp, camera, mediapipe, facedetection, drawnui, ml, mediapipe]
-image: /assets/img/facedetect1.jpg
+image: /assets/img/facedetect5.jpg
 ---
 
 ## Intro
 
-Mobile and desktop devices can detect almost anything in images today, starting with QR codes and ending with the number of calories in displayed food. There are many ways to do this on platforms supported by **.NET MAUI**. Various local ML engines such as **TensorFlow Lite**, native platform-only SDKs like **ARKit** for iOS, or remote vision API endpoints, either custom or provided by giants of the AI market, can all play a role. It is all up to your app architecture and implementation.
+Mobile and desktop devices can detect almost anything in images today, starting with QR codes and ending with the number of calories in displayed food. There are many ways to do this on platforms supported by **.NET MAUI**. Various local ML engines such as **TensorFlow Lite**, native platform-only SDKs like **ARKit** for iOS, or remote vision API endpoints, can all play a role. It is all up to your app architecture and implementation.
 
-When it comes to capturing these images from a live camera feed, the `DrawnUi.Maui.Camera` NuGet package is a good choice. In our [previous article](../VideoRecording/) we already showed how to use `SkiaCamera` to send real-time audio to AI. Today we will use it for **live face detection**.
+When it comes to running detection over  live camera feed, the `DrawnUi.Maui.Camera` NuGet package is a good choice. In our [previous article](../VideoRecording/) we already showed how to use `SkiaCamera` to send real-time audio to AI. Today we will use to demonstrate **live face detection**.
 
-Let's set up **MediaPipe** local face landmark detection from the live preview of `SkiaCamera`. I chose `MediaPipe` for maximum possible cross-platform consistency. The sample app, [DetectFaces](https://github.com/taublast/DetectFaces), is open source and runs the same way on **iOS, Android, and Windows**.
+[Sample app](https://github.com/taublast/DetectFaces) coming with this article sets up **MediaPipe** local face landmark detection, we chose it for maximum cross-platform consistency. App runs the same way on **iOS, Android, and Windows**.
 
-The app also draws overlays directly onto the Skia canvas and makes face masks stick to moving heads at camera frame rate.
+It also draws overlays and makes face masks stick to moving heads.
 
 <!-- Funny hat screenshot here -->
 
-You can inspect the open-source code to see how it was wired with `MediaPipe`. We will not talk about the specific app in detail; it is included as example source code. Our goal today is to show **how to use live video frames for AI/ML locally and with an API**.
+Our current goal is to show **how to use SkiaCamera live video frames for AI/ML locally and with an API** in general, sample implementation specifics will not be covered to keep it short. 
 
 ## The Plug
 
-When `SkiaCamera` runs a live preview, the images you see on the screen remain on GPU-backed surfaces during the processing flow. We need to extract images, and at a suitable size, into CPU memory so we can use them safely outside the camera flow. For that we can override the AI-ready `OnRawFrameAvailable(RawCameraFrame frame)` method. This callback fires on every camera frame before the frame goes to processing, so here we get the raw data before other code applies filter effects or overlays to it.
+When `SkiaCamera` runs a live preview, the images you see on the screen remain on GPU-backed surfaces during the processing flow. To use them out of the GPU camera flow we need to extract images at a needed size into CPU memory. For that we will override `OnRawFrameAvailable(RawCameraFrame frame)` method.
 
-The received struct `RawCameraFrame` holds a GPU-backed SkImage along with some metadata. The image can be of preview size when not recording, can be a huge high-resolution frame if we are in the middle of video recording, or in some cases can even be `null`.
-
-When `OnRawFrameAvailable` hits, we are inside a GPU processing thread. We should never do any heavy work here, but we can execute fast rescaling methods that read from GPU surfaces and provide the payloads we need for AI/ML use decoupled from this thread.
-
-## For Local ML
-
-The received `RawCameraFrame frame` exposes a `frame.TryGetRgba(width, height, buffer)`, which fills a pre-allocated `byte[]` with display-oriented RGBA pixels at the size you want for inference. That is the path the sample uses. It avoids per-frame image allocation, keeps the API consistent across platforms, and still works on zero-copy GPU paths where there may not even be a usable `SKImage` instance to hand out.
-
-It also carries a few bits of metadata:
+The received  `RawCameraFrame` struct holds a GPU-backed SkImage along with some metadata. 
 
 - `frame.SourceWidth` / `frame.SourceHeight` tell us the size of the incoming camera frame before resizing
 - `frame.Rotation` tells us how much extra rotation would be needed if we decide to use the raw image directly
 - `frame.RawImage` is optional advanced access only, valid only inside the callback, and may be `null` on some GPU-backed paths
 
-Even for local ML, the safest default is to drop frames while the detector is still working, applies not only to faces, but also to QR scanning, OCR, lightweight object detection, classification, or any model that runs continuously over live preview. It is better to skip frames than to make the preview lag.
+Now let's use some high preformance helper methods to extract images we will use for AI/ML.
+
+## For Local ML
+
+The received `RawCameraFrame frame` exposes a `TryGetRgba(width, height, buffer) method`, which fills a pre-allocated `byte[]` array with RGBA pixels at the size you want. 
+
+Even for local ML, the safest default is to drop frames while the detector is still working, applies not only to faces, but also to QR scanning, OCR, lightweight object detection, classification, or any model that runs continuously over live preview. It is better to skip frames than to make  camera preview lag.
+
+Here we have no camera-thread blocking, no unbounded queue, and explicit frame dropping while work is already in flight: 
 
 ```csharp
 private readonly byte[] _rgbaBuffer = new byte[targetWidth * targetHeight * 4];
@@ -73,9 +73,7 @@ protected override void OnRawFrameAvailable(RawCameraFrame frame)
 }
 ```
 
-Sample app has a bit different code. It avoids per-frame allocations by reusing multiple buffers and handing buffer ownership across the pipeline, so the above code is rather an illustration for: no camera-thread blocking, no unbounded queue, and explicit frame dropping while work is already in flight. 
-
-The following code is more optimized: it replaces the `ToArray()` snapshot with a small reusable buffer pool and submits work into a detector-owned pipeline instead of wrapping that handoff in another `Task.Run`:
+Our sample app avoids per-frame allocations by reusing multiple buffers and handing buffer ownership across the pipeline. The following is more optimized: we replace the `ToArray()` snapshot with a small reusable buffer pool and submit work into a detector-owned pipeline instead of wrapping that handoff in another `Task.Run`:
 
 ```csharp
 private readonly byte[][] _mlBuffers =
@@ -118,11 +116,11 @@ protected override void OnRawFrameAvailable(RawCameraFrame frame)
 }
 ```
 
-Detector already owns the background pipeline here, `OnRawFrameAvailable(...)` only prepares the frame and decides whether to drop or queue it, then hands the request off. Completion callbacks would later release the active buffer and, if needed, submit the newest queued frame.
+Detector already owns the background pipeline here, `OnRawFrameAvailable(...)` will only prepare the frame and decide whether to drop or queue it, and hand the request off afterwards. Completion callbacks would later release the active buffer and, if needed, submit the newest queued frame.
 
 ## For Remote API
 
-Our sample app uses local ML, but the same raw-frame hook would be used if we wanted to send frames to some hosted AI API.
+Our app uses local ML, but the same raw-frame hook would be used if we wanted to use frames with some AI API.
 
 For performance reasons we should not try to upload every preview frame, but, for example, allow one send at most every 300 ms, and also skip sending frames until the previous request has returned. 
 
@@ -168,13 +166,13 @@ protected override void OnRawFrameAvailable(RawCameraFrame frame)
 
 `TryGetJpeg(...)` or `TryGetPng(...)` return a standard encoded image payload that public APIs can usually accept directly.
 
-For custom endpoints that expect raw `RGBA8888` data you can use `TryGetRgbaBytes(...)` .
+For custom endpoints that expect raw `RGBA8888` data you can still use `TryGetRgbaBytes(...)` shown earlier.
  
 ## Sample App
 
-Feel free to play with this MediaPipe Tasks example and dig into the source code and also check the included docs: `Implementation.md` helps explain the architecture, and `Includes.md` explains how tML models are included inside the app for each platform. Normally one could customize the same setup to include other models and detect different kinds of things.
+Feel free to inspect included source code for the MediaPipe Tasks usage example and check the included docs: [Implementation.md](https://github.com/taublast/DetectFaces/blob/main/src/Implementation.md) helps explain the architecture, and [Includes.md](https://github.com/taublast/DetectFaces/blob/main/src/Includes.md) explains how tML models are included inside the app for each platform. Normally you could customize the same setup to include other models to detect different kinds of things with `MediaPipe`.
 
-### What Else Can You Detect
+### What Else You Can Detect
 
 The architecture - `MediaPipeTasksVision` on mobile, `Mediapipe.Net` TFLite graphs on Windows - generalizes to other tasks by swapping the model file and parsing different output structures:
 
@@ -184,13 +182,19 @@ The architecture - `MediaPipeTasksVision` on mobile, `Mediapipe.Net` TFLite grap
 - **Image segmentation** (`image_segmenter.task`) - per-pixel foreground/background separation (the Zoom background blur mechanism)
 - **Image classification** - whole-image category labels
 
-The hard parts - unmanaged memory safety on Windows, async frame queue, landmark smoothing - are already solved in the sample. Adding a new task is mostly parsing a different output.
+**The hard parts** - unmanaged memory safety on Windows, async frame queue, landmark smoothing - are **already solved** in the sample. Adding a new task is mostly parsing a different output.
+
+### Used Packages
+
+* Windows: `Mediapipe.Net` and `Mediapipe.Net.Runtime.CPU`.
+* iOS: `MediaPipeTasksVision.iOS`
+* Android `AppoMobi.Preview.MediaPipeTasksVision.Android` wich is a `MediaPipeTasksVision.Android` fork with new methods added for bulk landmarks read-back to reduce frame processing time x10. A PR is pending to main repo so maybe we could use original repo nuget afterwards.
 
 ## Final Thoughts
 
-Sending frames from a camera to a local ML model, with results drawn back at preview framerate, is surprisingly approachable once the async queue and scaling are handled. The performance numbers in the status bar of the sample app (resize time, inference time, frame dimensions, cpu/gpu) make it easy to tune for your target device.
+Sending frames from a live camera preview to a local ML model or remote API in .NET MAUI is well approachable. The performance numbers in the status bar of the sample app make it easy to tune for your target device.
 
-If you build something with this - a game, a fitness tracker, an AR effect - let me know. PRs are welcome too.
+I hope you find this article useful, if it helps you build something please let me know!
 
 ## Links and Resources
 
