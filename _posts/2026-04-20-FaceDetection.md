@@ -144,9 +144,9 @@ protected override void OnRawFrameAvailable(RawCameraFrame frame)
 
 Detector already owns the background pipeline here, `OnRawFrameAvailable(...)` will only prepare the frame and decide whether to drop or queue it, and hand the request off afterwards. Completion callbacks would later release the active buffer and, if needed, submit the newest queued frame. Because this sample uses `OutputOrientation.Display`, the detector buffer is already aligned to the live preview, so there is no extra detector-space rotation left to project afterwards.
 
-## For Remote API
+## For AI API
 
-Our app uses local ML, but the same raw-frame hook would be used if we wanted to use frames with some AI API.
+Our app uses local ML, but the same raw-frame hook would be used if we wanted to use frames with some API.
 
 For performance reasons we should not try to upload every preview frame, but, for example, allow one send at most every 300 ms, and also skip sending frames until the previous request has returned. 
 
