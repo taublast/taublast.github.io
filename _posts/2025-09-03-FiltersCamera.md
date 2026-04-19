@@ -187,52 +187,7 @@ Please feel free to contribute your own shaders and any improvements!
 
  *The author is available for consulting on drawn applications and custom controls for .NET MAUI. If you need help creating custom UI experiences, optimizing performance, or building entirely drawn apps, feel free to reach out.*
 
-<style>
-
-.left {
-    margin: 0.75rem 2.2rem 1rem 0;
-    float: left;
-}
-
-/* Responsive behavior for mobile */
-@media (max-width: 576px) {
-    .left {
-        float: none;
-        margin: 0.75rem auto 1rem auto;
-        display: block;
-    }
-}
-
-.video-container {
-  position: relative;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
-  height: 0;
-  overflow: hidden;
-  max-width: 100%;
-  background: #000;
-  margin-bottom: 1em;
-}
-
-.video-container iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.video-container-github {
-    min-height: 200px;
-    background: #000;
-    margin-bottom: 1em;
-}
-
-.video-container-github video {
-  width: 100%;
-  height: 100%;
-}
-
-</style>
+ 
 
 <!-- Place this tag in your head or just before your close body tag. -->
 <script async defer src="https://buttons.github.io/buttons.js"></script>

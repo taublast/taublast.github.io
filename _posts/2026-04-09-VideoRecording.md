@@ -5,7 +5,7 @@ description: "How to use SkiaCamera control in .NET MAUI for a video processing 
 date: 2026-04-09 12:00:00 +0000
 categories: [MAUI, DrawnUI, Camera, Video]
 tags: [dotnetmaui, skiasharp, camera, video, audio, realtime, drawnui]
-image: /assets/img/camhi.jpg
+image: /assets/img/camhi4.jpg
 ---
 
 ## DrawnUi.Maui.Camera
@@ -549,36 +549,4 @@ If you build something cool with it, please let me know. I’d be happy to see t
 
 *The author is available for consulting and works on drawn applications and custom controls for .NET MAUI. If you need help custom UI experiences, optimizing performance or building drawn mobile apps, feel free to reach out.*
 
-
-<style>
-
-.video-container {
-  position: relative;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
-  height: 0;
-  overflow: hidden;
-  max-width: 100%;
-  margin-bottom: 1em;
-}
-
-.video-container iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.video-container-github {
-    min-height: 200px;
-    margin-bottom: 1em;
-}
-
-.video-container-github video {
-  max-height: 547px;
-  width: 100%;
-  height: 100%;
-  background: #000;
-}
-
-</style>
+ 

@@ -200,3 +200,47 @@ html[data-mode=dark] div.highlighter-rouge .rouge-code pre {
 :is(html[data-mode], html:not([data-mode])) .highlight .ow {
   color: var(--rouge-keyword);
 }
+
+.video-container {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
+  margin-bottom: 1em;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.video-container-github {
+    min-height: 200px;
+    margin-bottom: 1em;
+}
+
+.video-container-github video {
+  max-height: 547px;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+.left {
+    margin: 0.75rem 2.2rem 1rem 0;
+    float: left;
+}
+
+/* Responsive behavior for mobile */
+@media (max-width: 576px) {
+    .left {
+        float: none;
+        margin: 0.75rem auto 1rem auto;
+        display: block;
+    }
+}
+ 
