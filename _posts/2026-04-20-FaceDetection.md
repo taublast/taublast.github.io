@@ -2,9 +2,9 @@
 layout: post
 title: "Live Camera Face Detection in .NET MAUI"
 description: "How to use SkiaCamera with AI/ML locally and with an API"
-date: 2026-04-20 12:00:00 +0000
+date: 2026-04-20 8:00:00 +0000
 categories: [MAUI, DrawnUI, Camera, AI]
-tags: [dotnetmaui, skiasharp, camera, mediapipe, facedetection, drawnui, ml]
+tags: [dotnetmaui, skiasharp, camera, mediapipe, facedetection, drawnui, ml, skiacamera]
 image: /assets/img/facedetect5.jpg
 ---
 
@@ -279,7 +279,7 @@ Now that you know how to get images to use with AI/ML, reading app source code m
 <img src="../assets/img/mask.jpg" alt="Mask applied to detected face landmarks" height="350"
 style="margin-top: 16px;" />
 
-To be able to draw bitmap masks like a Spider-Man mask or a funny hat, we use configurations to position them:
+To be able to draw bitmap masks like a Spider-Man mask or a funny hat, we use configurations to position them relatively to detected face:
 
 ```csharp
                     config = ModePicker.SelectedIndex switch
@@ -305,7 +305,7 @@ To be able to draw bitmap masks like a Spider-Man mask or a funny hat, we use co
 
 If you choose to create your own mask, you can easily create more configs on top of the existing ones.
 
-To be able to draw these with max fps we store loaded bitmaps inside GPU-backed textures:
+To be able to draw these with max fps we store currently loaded bitmap inside a GPU-backed texture:
 
 ```csharp
    //load image from resources
@@ -317,9 +317,9 @@ To be able to draw these with max fps we store loaded bitmaps inside GPU-backed 
    MaskBitmap = SKBitmap.Decode(managed);
    
    //exec on GPU thread: store bitmap in GPU texture
-   SafeAction(() =>
+   SafeAction(() => //execute at the end of SkiaSharp canvas drawing
    {
-       using var gpu = this.CreateSurface(MaskBitmap.Width, MaskBitmap.Height, true);
+       using var gpu = this.CreateSurface(MaskBitmap.Width, MaskBitmap.Height, isGpu: true);
        gpu.Canvas.Clear(SKColors.Transparent);
        gpu.Canvas.DrawBitmap(MaskBitmap, 0, 0);
        gpu.Canvas.Flush();
