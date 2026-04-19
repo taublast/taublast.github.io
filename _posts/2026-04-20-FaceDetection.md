@@ -32,7 +32,7 @@ Please note that today our goal will be to show **how to use SkiaCamera live vid
 
 ## The Setup
 
-Please refer to the [previous article](../VideoRecording/) on how to install and initalize `SkiaCamera` control. You would see in the sample that we are using XAML to drop our subclassed control into a usual MAUI layout.
+Please refer to the [previous article](../VideoRecording/) on how to install and initialize `SkiaCamera` control. You would see in the sample that we are using XAML to drop our subclassed control into a usual MAUI layout.
 
 For AI/ML purposes we need to enable its processing pipeline:
 
@@ -50,7 +50,7 @@ The received `RawCameraFrame` struct holds a GPU-backed `SKImage` along with som
 - `frame.RawImageRotation` tells us how much extra rotation would be needed if we decide to use the raw image directly
 - `frame.DisplayRotation` tells us how the current preview is rotated relative to portrait
 - `frame.RawImageIsMirrored` tells us whether raw-image consumers would still need to apply selfie mirroring on that path
-- `frame.RawImage` is optional advanced access only, valid only inside the callback, and may be `null` on some GPU-backed paths, but helpers might still be able to exract data from GPU in this rare case.
+- `frame.RawImage` is optional advanced access only, valid only inside the callback, and may be `null` on some GPU-backed paths, but helpers might still be able to extract data from GPU in this rare case.
 
 Now let's use the helper methods it exposes to extract CPU images for AI/ML, scaled-down, rotated, and center-cropped when needed.
 
@@ -58,9 +58,9 @@ Now let's use the helper methods it exposes to extract CPU images for AI/ML, sca
 
 `RawCameraFrame` struct exposes `TryGetRgba(width, height, buffer, orientation, cropRatio)` method, which fills a pre-allocated `byte[]` with RGBA pixels at the final size you need for your model.
 
-The sample app uses `cropRatio` of default 1 - no zooming, `orientation` of default `OutputOrientation.Display` - we don't care if the image is "head-up" we just want exacly what device display is showing even if rotated in landscape.
+The sample app uses `cropRatio` of default 1 - no zooming, `orientation` of default `OutputOrientation.Display` - we don't care if the image is "head-up"; we just want exactly what device display is showing even if rotated in landscape.
 
-If for your ML you want a "head-up" rotation you can use`OutputOrientation.Portrait` instead. Also you might want to crop the image for example to cut borders if you need to detect an object that is most probably in the center, can reduce `cropRatio` for that, for example `0.9` would mean you cut `0.1` from borders.
+If for your ML you want a "head-up" rotation you can use `OutputOrientation.Portrait` instead. Also you might want to crop the image, for example to cut borders if you need to detect an object that is most probably in the center. You can reduce `cropRatio` for that. For example, `0.9` would mean you cut `0.1` from borders.
 
 Our sample just calls with method defaults, not even passing `orientation, cropRatio)`:
 
@@ -71,7 +71,7 @@ Our sample just calls with method defaults, not even passing `orientation, cropR
 
 Even for local ML, the safest default is to drop frames while the detector is still busy. That applies not only to faces, but also to QR scanning, OCR, lightweight object detection, classification, or any model that runs continuously over live preview. It is better to skip frames than to make the camera preview lag.
 
-Here is an example for some abstract ML usecase: no camera-thread blocking, no unbounded queue, and explicit frame dropping while work is already in flight: 
+Here is an example for some abstract ML use case: no camera-thread blocking, no unbounded queue, and explicit frame dropping while work is already in flight:
 
 ```csharp
 private readonly byte[] _rgbaBuffer = new byte[targetWidth * targetHeight * 4];
@@ -201,7 +201,7 @@ protected override void OnRawFrameAvailable(RawCameraFrame frame)
 
 `TryGetJpeg(...)` or `TryGetPng(...)` return a standard encoded image payload at the final orientation and size you requested.
 
-For custom endpoints that expect raw `RGBA8888` data you can still use `TryGetRgbaBytes(...)` shown earlier.
+For custom endpoints that expect raw `RGBA8888` data you can still use `TryGetRgbaBytes(...)`.
 
 ## Debug The Image
 
@@ -274,12 +274,12 @@ The smaller size you request the faster will the `GPU scaled -> CPU result` tran
  
 ## The Sample App
 
-Now that you know how to get images to use with AI/ML, reading app source code might be easier. I have included more docs: [Implementation.md](https://github.com/taublast/DetectFaces/blob/main/src/Implementation.md) explaining the architecture, and [Includes.md](https://github.com/taublast/DetectFaces/blob/main/src/Includes.md) which explains how ML models are shipped inside app resources for each platform. The setup can be adapted to other `MediaPipe` tasks by swapping models and parsing different outputs.
+Now that you know how to get images to use with AI/ML, reading app source code might be easier. I have included more docs: [Implementation.md](https://github.com/taublast/DetectFaces/blob/main/src/Implementation.md) explaining the architecture, and [Includes.md](https://github.com/taublast/DetectFaces/blob/main/src/Includes.md) which explains how ML models are shipped inside app resources for each platform. The setup can be adapted to other `MediaPipe Tasks` by swapping models and parsing different outputs.
 
 <img src="../assets/img/mask.jpg" alt="Mask applied to detected face landmarks" height="350"
 style="margin-top: 16px;" />
 
-To be able to draw bitmap masks like Spiderman Mask, or a Funny Hat, we use configurations to position them:
+To be able to draw bitmap masks like a Spider-Man mask or a funny hat, we use configurations to position them:
 
 ```csharp
                     config = ModePicker.SelectedIndex switch
@@ -303,7 +303,7 @@ To be able to draw bitmap masks like Spiderman Mask, or a Funny Hat, we use conf
                     await CameraControl.SetupMaskAsync(config);
 ```
 
-If you choose to create your own mask you could easily create configs for them on top of existing.
+If you choose to create your own mask, you can easily create more configs on top of the existing ones.
 
 To be able to draw these with max fps we store loaded bitmaps inside GPU-backed textures:
 
@@ -329,7 +329,7 @@ To be able to draw these with max fps we store loaded bitmaps inside GPU-backed 
 
 Then we can draw our `MaskImage` inside the SkiaCamera callback `ProcessFrame` with appropriate projected rotation and position.
 
-Same drawing code we used in `ProcessFrame` hook will also used when saving captured still photos. A photo can be like very large, like, for example, 4000x3000, and if we draw detected frame or landmarks dots with incorrect stroke width those SkiaSharp primitives would be invisible for such density. We solve this by targeting a safe 300dpi look: 
+The same drawing code we use in the `ProcessFrame` hook is also used when saving captured still photos. A photo can be very large, for example `4000x3000`, and if we draw detected frames or landmark dots with the wrong stroke width those SkiaSharp primitives would become almost invisible at that pixel size. We solve this by scaling stroke width from a safe 300-pixel baseline:
 
 ```csharp
 var density = Math.Min(frame.Width, frame.Height) / 300f; 
