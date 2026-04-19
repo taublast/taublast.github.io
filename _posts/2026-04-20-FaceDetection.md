@@ -46,13 +46,7 @@ Now when `SkiaCamera` runs a live preview, the images you see on the screen rema
 
 The received `RawCameraFrame` struct holds a GPU-backed `SKImage` along with some metadata.
 
-- `frame.SourceWidth` / `frame.SourceHeight` tell us the size of the incoming camera frame before resizing
-- `frame.RawImageRotation` tells us how much extra rotation would be needed if we decide to use the raw image directly
-- `frame.DisplayRotation` tells us how the current preview is rotated relative to portrait
-- `frame.RawImageIsMirrored` tells us whether raw-image consumers would still need to apply selfie mirroring on that path
-- `frame.RawImage` is optional advanced access only, valid only inside the callback, and may be `null` on some GPU-backed paths, but helpers might still be able to extract data from GPU in this rare case.
-
-Now let's use the helper methods it exposes to extract CPU images for AI/ML, scaled-down, rotated, and center-cropped when needed.
+Normally now you would need to scale down the image, orient it properly and in some cases zoom a bit to remove irrelevant margins. We have all the tools for that.
 
 ## For Local ML
 
