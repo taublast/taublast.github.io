@@ -269,6 +269,8 @@ protected override void OnRawFrameAvailable(RawCameraFrame frame)
     // normal ML flow continues here...
 }
 ```
+
+The smaller size you request the faster will the `GPU scaled -> CPU result` transfer be.
  
 ## The Sample App
 
@@ -276,6 +278,70 @@ Now that you know how to get images to use with AI/ML, reading app source code m
 
 <img src="../assets/img/mask.jpg" alt="Mask applied to detected face landmarks" height="350"
 style="margin-top: 16px;" />
+
+To be able to draw bitmap masks like Spiderman Mask, or a Funny Hat, we use configurations to position them:
+
+```csharp
+                    config = ModePicker.SelectedIndex switch
+                    {
+                        3 => new MaskConfiguration
+                        {
+                            Filename = "hat_cake.png",
+                            Position = MaskPosition.Top,
+                            WidthMultiplier = 1.6f,
+                            YOffsetRatio = 0.05f
+                        },
+                        _ => new MaskConfiguration
+                        {
+                            Filename = "mask_spiderman.png",
+                            Position = MaskPosition.Inside,
+                            WidthMultiplier = 1.25f,
+                            YOffsetRatio = -0.2f
+                        }
+                    };
+
+                    await CameraControl.SetupMaskAsync(config);
+```
+
+If you choose to create your own mask you could easily create configs for them on top of existing.
+
+To be able to draw these with max fps we store loaded bitmaps inside GPU-backed textures:
+
+```csharp
+   //load image from resources
+   using var stream = await FileSystem.OpenAppPackageFileAsync(config.Filename);
+   using var managed = new MemoryStream();
+   await stream.CopyToAsync(managed);
+   managed.Position = 0;
+
+   MaskBitmap = SKBitmap.Decode(managed);
+   
+   //exec on GPU thread: store bitmap in GPU texture
+   SafeAction(() =>
+   {
+       using var gpu = this.CreateSurface(MaskBitmap.Width, MaskBitmap.Height, true);
+       gpu.Canvas.Clear(SKColors.Transparent);
+       gpu.Canvas.DrawBitmap(MaskBitmap, 0, 0);
+       gpu.Canvas.Flush();
+       MaskImage = gpu.Snapshot();
+   });
+```
+
+Then we can draw our `MaskImage` inside the SkiaCamera callback `ProcessFrame` with appropriate projected rotation and position.
+
+Same drawing code we used in `ProcessFrame` hook will also used when saving captured still photos. A photo can be like very large, like, for example, 4000x3000, and if we draw detected frame or landmarks dots with incorrect stroke width those SkiaSharp primitives would be invisible for such density. We solve this by targeting a safe 300dpi look: 
+
+```csharp
+var density = Math.Min(frame.Width, frame.Height) / 300f; 
+_paintDetectionDotsStroke.StrokeWidth = Math.Max(2f, 2f * density); 
+//draw landmarks points
+frame.Canvas.DrawPoints(SKPointMode.Points, pts, _paintDetectionDotsStroke);
+```
+
+This keeps all masks visually consistent between live preview and the final still photo.
+
+In order to smooth mask overlay movement we use a One Euro filter. It runs per landmark, separately for X and Y, so a still face gets strong jitter suppression while a moving face gets much less added lag. Another prediction step extrapolates from the two latest detections, which helps compensate for detector latency when the head moves quickly. 
+
 
 ### What Else You Can Detect
 
@@ -293,13 +359,13 @@ The architecture - `MediaPipeTasksVision` on mobile, `Mediapipe.Net` TFLite grap
 
 * Windows: `Mediapipe.Net` and `Mediapipe.Net.Runtime.CPU`.
 * iOS: `MediaPipeTasksVision.iOS` from the [MediaPipeTasks](https://github.com/v-hogood/MediaPipeTasks) project.
-* Android: `AppoMobi.Preview.MediaPipeTasksVision.Android`, which is a [`MediaPipeTasksVision.Android` fork with extra methods](https://github.com/taublast/MediaPipeTasks/tree/bulkpts) for bulk landmark read-back to reduce frame processing time by about 3x. A PR is pending in the main repo, so later it may be possible to switch back to the original NuGet package from [MediaPipeTasks](https://github.com/v-hogood/MediaPipeTasks).
+* Android: `AppoMobi.Preview.MediaPipeTasksVision.Android`, which is a `MediaPipeTasksVision.Android` fork [with extra methods](https://github.com/taublast/MediaPipeTasks/tree/bulkpts) for bulk landmark read-back to reduce frame processing time by about 3x. A PR is pending in the main repo, so later it may be possible to switch back to the original NuGet package from [MediaPipeTasks](https://github.com/v-hogood/MediaPipeTasks).
 
 ## Final Thoughts
 
 Sending frames from a live camera preview to a local ML model or remote API in .NET MAUI is very approachable. The performance numbers in the sample app's status bar make it easier to tune the pipeline for your target device.
 
-I hope you find this article useful. If it helps you build something, please let me know!
+I hope you find this article useful. If it helps you build something, please let me know.   Feel free to ask your questions in comments!
 
 ## Links and Resources
 
