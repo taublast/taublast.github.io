@@ -229,6 +229,7 @@ Examples:
 When translating into Russian:
 
 - prefer natural technical Russian over literal calques
+- the result must read like the author's own technical prose, not like machine translation; if a sentence sounds translated, rewrite it for natural flow without changing meaning
 - keep established English identifiers in Latin script
 - translate general concepts, but keep framework/API names exact
 - use transliteration sparingly and only where it reads naturally to the intended audience
