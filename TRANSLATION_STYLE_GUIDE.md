@@ -237,6 +237,7 @@ When translating into Russian:
 Preferred pattern:
 - "control" in prose may become "control", "component", or "element" depending on context
 - but `SkiaControl` must remain `SkiaControl`
+- plain-language "canvas" in prose should normally be translated as "холст"; keep identifiers like `Canvas`, `SKCanvas`, `SKCanvasView`, and `canvas.Handle` unchanged
 
 Avoid:
 - forced slang
