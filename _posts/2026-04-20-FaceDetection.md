@@ -365,6 +365,7 @@ I hope you find this article useful. If it helps you build something, please let
 
 - [DetectFaces](https://github.com/taublast/DetectFaces) - sample app with all platforms implemented, source for everything in this article
 - [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera) - `SkiaCamera` control
+- [MediaPipe Tasks for .NET MAUI](https://github.com/v-hogood/MediaPipeTasks) - bindings for mobile
 - [AI Captions and Live Video Processing in .NET MAUI](../VideoRecording/) - previous article in this series
 - [MediaPipe Tasks Vision - Android](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker/android) - official Android MediaPipe docs
 - [MediaPipe Tasks Vision - iOS](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker/ios) - official iOS MediaPipe docs
