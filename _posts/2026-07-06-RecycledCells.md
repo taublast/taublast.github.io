@@ -12,7 +12,7 @@ image: /assets/img/cells2.jpg
 
 Once you prepare your UI to be drawn, it runs on MAUI mobile and desktop, Blazor, OpenTK Windows and Linux, and other .NET platforms, looking similarly everywhere since it's all the same code drawing on the appropriate Skia canvas.
 
-<div style="width:100%; max-width:350px; max-height:500px; aspect-ratio: 350 / 500; margin:0 auto;">
+<div style="width:100%; max-width:350px; max-height:600px; aspect-ratio: 350 / 600; margin:0 auto;">
   <iframe src="https://chatproto.appomobi.com/" style="width:100%; height:100%; border:0;" loading="lazy"></iframe>
 </div>
 
