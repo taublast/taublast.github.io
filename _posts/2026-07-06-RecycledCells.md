@@ -18,7 +18,7 @@ Once you prepare your UI to be drawn, it runs on MAUI mobile and desktop, Blazor
 
 ---
 
-*DrawnUI chat demo, written in C#, runs on a SkiaSharp canvas.*
+*DrawnUI chat demo, written in C#, runs on a SkiaSharp canvas. Same code for browser. .NET MAUI, OpenTk and .NET*
 
 ## CollectionView
 
