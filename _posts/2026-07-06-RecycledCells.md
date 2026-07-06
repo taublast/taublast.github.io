@@ -237,9 +237,29 @@ Chat apps need to scroll to pinned, unread, or marked messages on demand.
 
 ### Keyboard Offset and Focus
 
-Users expect the chat to shrink when the on-screen keyboard opens on mobile, while keeping the top nav bar visible. With built-in native behavior, this is sometimes possible, sometimes not. With DrawnUI, all UI logic is under your control. React to keyboard size changes in the chat page and adjust a placeholder under the chat list, while the nav bar stays in place.
+Users expect the chat to shrink when the on-screen keyboard opens on mobile, while keeping the top nav bar visible. With built-in native behavior, this is sometimes possible, sometimes not. With DrawnUI, all UI logic is under your control. React to keyboard size changes in the chat page and adjust a placeholder under the chat list, while the nav bar stays in place. Here we use a base page provided by DrawnUI which observes keyboard offset and notifies us via a `KeyboardSize` bindable property.
 
-Users also expect the keyboard not to close when they press both the UI Send button and the keyboard Send button. DrawnUI handles this correctly.
+```csharp
+  // KEYBOARD SPACER (mobile): pushes the typing bar above the soft keyboard
+  new SkiaControl
+  {
+      UseCache = SkiaCacheType.Operations,
+      HeightRequest = 0,
+      HorizontalOptions = LayoutOptions.Fill,
+  }.Observe(this, (me, prop) =>
+  {
+      if (prop == nameof(KeyboardSize))
+      {
+          MainThread.BeginInvokeOnMainThread(() =>
+          {
+              //MAUI needs UI thread here
+              me.HeightRequest = KeyboardSize;
+          });
+      }
+  }),
+```
+
+Users also expect the keyboard not to close when they press both the UI Send button and the keyboard Send button. DrawnUI handles this correctly: drawn elements use a property with an self-explanatory name `CanBeFocused`, so if it is `false` (default) they will not steal focus from your already focused entry. So we enable this property for areas which should defocus chat entry when tapped, like the chat messages, area and the top navigation bar.
 
 ## Conclusion
 
