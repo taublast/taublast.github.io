@@ -12,7 +12,7 @@ image: /assets/img/ru/camhi.jpg
 
 Для захвата камеры в .NET MAUI есть хорошие варианты: [CommunityToolkit.Maui.Camera](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/views/camera-view), [MediaPicker](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device-media/picker) и платформенное API.
 
-Для особого класса задач, где необходимо обрабатывать превью и кадры, идущие в запись, есть пакет [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera).
+Для особого класса задач, где необходимо обрабатывать превью и кадры, идущие в запись, есть пакет [DrawnUi.Maui.Camera](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera).
 
 Лучше всего заходит для :
 
@@ -39,7 +39,7 @@ image: /assets/img/ru/camhi.jpg
 
 В следующей статье мы посмотрим *как использовать `SkiaCamera` для распознавания лиц с помощью ML в реальном времени* и обсудим сценарии, при которых необходимо слать поток видео кадров в AI/ML.
 
-Уже перед прочтением этой статьи вы можете собрать и запустить [приложение-пример](https://github.com/taublast/DrawnUi.Maui.Camera) на мобильном устройстве, а также на ПК Windows или Mac, если подключена камера.
+Уже перед прочтением этой статьи вы можете собрать и запустить [приложение-пример](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera) на мобильном устройстве, а также на ПК Windows или Mac, если подключена камера.
 
 <iframe src="https://taublast.github.io/assets/vids/formula.mp4" width="100%" height="547" frameborder="0"></iframe>
 
@@ -49,7 +49,7 @@ image: /assets/img/ru/camhi.jpg
 
 ## Настройка
 
-Точка входа в документацию на английском языке для элемента, - это [README](https://github.com/taublast/DrawnUi.Maui.Camera) проекта.
+Точка входа в документацию на английском языке для элемента, - это [README](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera) проекта.
 
 Чтобы использовать `SkiaCamera` в приложении **.NET MAUI**, установите пакет, инициализируйте DrawnUI, а затем разместите камеру внутри аппаратно ускоренного Skia-холста.
 
@@ -141,7 +141,7 @@ Super.RotationChanged += OnRotationChanged; //Super - это супервизо�
 
 ### Разрешения
 
-Как задать нативные разрешения для каждой платформы подробно описано в [README](https://github.com/taublast/DrawnUi.Maui.Camera), а для элемента мы можем опционально задать флаги, чтобы он знал, какие именно надо запросить у пользователя при запуске:
+Как задать нативные разрешения для каждой платформы подробно описано в [README](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera), а для элемента мы можем опционально задать флаги, чтобы он знал, какие именно надо запросить у пользователя при запуске:
 
 ```csharp
 Camera.NeedPermissionsSet = NeedPermissions.Camera
@@ -178,7 +178,7 @@ Canvas.WillFirstTimeDraw += (sender, context) =>
 
 Пример из репозитория отрабатывает почти весь набор настроек камеры, а также некоторые примеры процессинга данных: аудио-визуализаторы, OpenAI-субтитры, SKSL-фильтры. 
 
-UI описан C#-кодом, без XAML, - отдельный пример для XAML и MVVM лежит в другом репозитории: [DrawnUI for .NET MAUI Demo](https://github.com/taublast/DrawnUi.Maui.Demo).
+UI описан C#-кодом, без XAML, - отдельный пример для XAML и MVVM лежит в другом репозитории: [DrawnUI for .NET MAUI Demo](https://github.com/DrawnUi/DrawnUi.Net.Maui.Demo).
 
 UI состоит из трёх основных частей:
 
@@ -279,7 +279,7 @@ await CameraControl.StopVideoRecording(true); // true = без сохранен�
 
 И `IsPreRecording`, и `IsRecording` являются bindable-свойствами, так что состояние кнопки записи, подписи и анимации можно связать напрямую без дополнительной логики.
 
-Полный разбор смотрите в [PreRecording.md](https://github.com/taublast/DrawnUi.Maui.Camera/blob/main/PreRecording.md).
+Полный разбор смотрите в [PreRecording.md](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera/blob/main/PreRecording.md).
 
 ## SKSL-видеофильтры
 
@@ -515,11 +515,11 @@ private async void OnCaptureSuccess(object sender, CapturedImage captured)
 
 ## Ссылки и ресурсы
 
-- [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera) - репозиторий контрола SkiaCamera с sample app и документацией
-- [DrawnUi.Maui.Demo](https://github.com/taublast/DrawnUi.Maui.Demo) - пример использования SkiaCamera для фотографий с XAML/MVVM
+- [DrawnUi.Maui.Camera](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera) - репозиторий контрола SkiaCamera с sample app и документацией
+- [DrawnUi.Maui.Demo](https://github.com/DrawnUi/DrawnUi.Net.Maui.Demo) - пример использования SkiaCamera для фотографий с XAML/MVVM
 - [Building a Real-time Audio Processing App](https://habr.com/ru/articles/1009382/) - более ранняя статья об использовании SkiaCamera для аудио с примером приложения
 - [Real-Time Camera Filters](../FiltersCamera/) - более ранняя статья на английском о применении SKSL-шейдеров со SkiaCamera и примером приложения
-- [DrawnUI for .NET MAUI](https://github.com/taublast/DrawnUi) - OSS-репозиторий движка рендеринга, на котором построен этот контрол
+- [DrawnUI for .NET MAUI](https://github.com/DrawnUi/DrawnUi.Net) - OSS-репозиторий движка рендеринга, на котором построен этот контрол
 - [SkiaSharp](https://github.com/mono/SkiaSharp) - базовая 2D-графическая библиотека, благодаря которой всё это стало возможным
 
 ---

@@ -12,7 +12,7 @@ image: /assets/img/camhi4.jpg
 
 If you just need camera capture in .NET MAUI, there are solid options already: [CommunityToolkit.Maui.Camera](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/views/camera-view), [MediaPicker](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device-media/picker), and platform-native APIs.
 
-For the other kind of job: when preview and recording are part of a realtime pipeline, and you want to process frames before they hit the encoder, meet [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera).
+For the other kind of job: when preview and recording are part of a realtime pipeline, and you want to process frames before they hit the encoder, meet [DrawnUi.Maui.Camera](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera).
 
 Best for:
 
@@ -56,7 +56,7 @@ The [previous article](../SolTempo) covers the audio processing side of the pipe
 
 ## Control Setup
 
-Full control docs entry point is the project [README](https://github.com/taublast/DrawnUi.Maui.Camera).
+Full control docs entry point is the project [README](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera).
 
 To use `SkiaCamera` in a **.NET MAUI** app, install the package, initialize DrawnUI, then host the camera inside a hardware-accelerated Skia canvas. [DrawnUI](https://drawnui.net) library provides us with high-level abstractions to comfortably draw and process graphics using SkiaSharp.
 
@@ -148,7 +148,7 @@ Super.RotationChanged += OnRotationChanged;
 
 ### Permissions
 
-Set platform native permissions as documented in the [README](https://github.com/taublast/DrawnUi.Maui.Camera). Then optionally define flags so the control can request them automatically:
+Set platform native permissions as documented in the [README](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera). Then optionally define flags so the control can request them automatically:
 
 ```csharp
 Camera.NeedPermissionsSet = NeedPermissions.Camera
@@ -185,7 +185,7 @@ Under the hood SkiaCamera is a wrapper for a `SkiaImage` DrawnUI control that re
 
 ## Sample App
 
-The repo sample exposes almost every relevant camera setting. Plus we have live audio visualizers, OpenAI captions encoded into final video and SKSL filters. UI is built in C# code. A XAML usage example lives in a separate repo: [DrawnUI for .NET MAUI Demo](https://github.com/taublast/DrawnUi.Maui.Demo).
+The repo sample exposes almost every relevant camera setting. Plus we have live audio visualizers, OpenAI captions encoded into final video and SKSL filters. UI is built in C# code. A XAML usage example lives in a separate repo: [DrawnUI for .NET MAUI Demo](https://github.com/DrawnUi/DrawnUi.Net.Maui.Demo).
 
 App UI presents three main parts: 
 
@@ -291,7 +291,7 @@ await CameraControl.StopVideoRecording(true); // true = discard
 
 Both `IsPreRecording` and `IsRecording` are bindable, so record button state, labels, and animations wire up directly without extra logic.
 
-For the full breakdown of the muxing flow see [PreRecording.md](https://github.com/taublast/DrawnUi.Maui.Camera/blob/main/PreRecording.md).
+For the full breakdown of the muxing flow see [PreRecording.md](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera/blob/main/PreRecording.md).
 
 ## SKSL Video Filters 
 
@@ -538,11 +538,11 @@ If you build something cool with it, please let me know. I’d be happy to see t
 
 ## Links and resources
 
-- [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera) - SkiaCamera control repository with sample app and documentation
-- [DrawnUi.Maui.Demo](https://github.com/taublast/DrawnUi.Maui.Demo) - a XAML/MVVM example of using SkiaCamera for taking photos
+- [DrawnUi.Maui.Camera](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera) - SkiaCamera control repository with sample app and documentation
+- [DrawnUi.Maui.Demo](https://github.com/DrawnUi/DrawnUi.Net.Maui.Demo) - a XAML/MVVM example of using SkiaCamera for taking photos
 - [Real-Time Camera Filters](../FiltersCamera/) - earlier post about using SKSL shaders with SkiaCamera with example app
 - [Building a Real-time Audio Processing App](../SolTempo/) - earlier post about using SkiaCamera for audio with example app
-- [DrawnUI for .NET MAUI](https://github.com/taublast/DrawnUi) - rendering engine OSS repo behind this control
+- [DrawnUI for .NET MAUI](https://github.com/DrawnUi/DrawnUi.Net) - rendering engine OSS repo behind this control
 - [SkiaSharp](https://github.com/mono/SkiaSharp) - the underlying 2D graphics library which made this all possible
 
 ---

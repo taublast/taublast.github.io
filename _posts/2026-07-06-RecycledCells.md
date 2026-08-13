@@ -210,6 +210,8 @@ protected override void ContextPropertyChanged(object sender, PropertyChangedEve
 
 ### Limited Data Window
 
+**Update:** the mechanics below became a library class, `WindowedSource<T>`, so you no longer have to write them yourself. The library also gained a separate built-in window that bounds cells and measuring over a big collection. Both are covered in [Part II](/posts/RecycledCells2/). The manual way below still works when you want full control.
+
 Like a room shouldn’t hold 1000 people, a control shouldn’t load a million-row data source without limits. You need mechanics to limit the data window while letting the control adapt seamlessly to changed data.
 
 `SkiaScroll` provides two-directional load-more mechanics. Beyond `LoadMoreCommand`, you have `LoadMoreTopCommand` to load missing data in any direction and cut data from the other side using `ObservableRangeCollection` — the ability to change data ranges without resetting `ItemsSource`.
@@ -272,9 +274,9 @@ DrawnUI continues to evolve, and future built-in elements will cover more use ca
 - [News Feed Tutorial](https://drawnui.net/articles/news-feed-tutorial.html) first sample
 - [Drawn Chat List](https://github.com/taublast/DrawnChatList) second sample
 - [DrawnUI Site](https://drawnui.net/) site for documentation and examples
-- [DrawnUI Repo](https://github.com/taublast/DrawnUi) open-source 
+- [DrawnUI Repo](https://github.com/DrawnUi/DrawnUi.Net) open-source 
 - [MAUI CollectionView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/collectionview) guide and docs
-working sample used in this article
+
 ---
 
 *The author is available for consulting and development works on mobile apps and custom controls for .NET. If you need help with custom UI, native interop, or performance work, feel free to [reach out](/about).*

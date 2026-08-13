@@ -192,7 +192,7 @@ protected override void OnRawFrameAvailable(RawCameraFrame frame)
 
 ## Отладка
 
-Если нужно проверить, что вы реально отправляете в AI/ML, можно сохранить один кадр изображения в галерею устройства и посмотреть глазами. Простой способ убедиться, что с ориентацией, обрезкой все действительно так, как вы ожидаете. Не забудьте дать приложению доступ к галерее, см. [README](https://github.com/taublast/DrawnUi.Maui.Camera) `SkiaCamera`, там всё описано.
+Если нужно проверить, что вы реально отправляете в AI/ML, можно сохранить один кадр изображения в галерею устройства и посмотреть глазами. Простой способ убедиться, что с ориентацией, обрезкой все действительно так, как вы ожидаете. Не забудьте дать приложению доступ к галерее, см. [README](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera) `SkiaCamera`, там всё описано.
 
 Если приложение уже использует `TryGetJpeg(...)`, можно сохранить ровно тот же самый `JPEG`:
 
@@ -355,12 +355,12 @@ frame.Canvas.DrawPoints(SKPointMode.Points, pts, _paintDetectionDotsStroke);
 ## Ссылки и ресурсы
 
 - [DetectFaces](https://github.com/taublast/DetectFaces) - приложение-пример, исходный код из этой статьи
-- [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera) - элемент `SkiaCamera`
+- [DrawnUi.Maui.Camera](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera) - элемент `SkiaCamera`
 - [AI Captions and Live Video Processing in .NET MAUI](../VideoRecording/) - предыдущая статья этой серии
 - [MediaPipe Tasks Vision - Android](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker/android) - официальная документация MediaPipe для Android
 - [MediaPipe Tasks Vision - iOS](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker/ios) - официальная документация MediaPipe для iOS
 - [One Euro Filter](https://gery.casiez.net/1euro/) - алгоритм адаптивного сглаживания, который используется для стабилизации маски
-- [DrawnUI for .NET MAUI](https://github.com/taublast/DrawnUi) - движок, который рендерит нашу SkiaCamera
+- [DrawnUI for .NET MAUI](https://github.com/DrawnUi/DrawnUi.Net) - движок, который рендерит нашу SkiaCamera
 - [SkiaSharp](https://github.com/mono/SkiaSharp) - 2D-графическая библиотека, в основе всего этого дела
 
 ---

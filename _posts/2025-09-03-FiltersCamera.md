@@ -14,14 +14,14 @@ image: /assets/img/filters.jpg
 
 If you've been following my previous articles you might recall that a `SkiaCamera` control was already used for an [Android ML photo recognition app](../MauiJuly/). Today I'm happy to announce that this control now supports Android, iOS, Mac Catalyst and Windows. You could use it inside a classic .NET MAUI app by wrapping it into a [DrawnUI Canvas](https://drawnui.net/).
 
-[SkiaCamera](https://github.com/taublast/DrawnUi.Maui.Camera) provides camera preview that seamlessly integrates with DrawnUI's hardware-accelerated visual effects system, allowing you to do whatever you please with live camera feed and to process still captured photos with all the power of [SkiaSharp](https://github.com/mono/SkiaSharp).
+[SkiaCamera](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera) provides camera preview that seamlessly integrates with DrawnUI's hardware-accelerated visual effects system, allowing you to do whatever you please with live camera feed and to process still captured photos with all the power of [SkiaSharp](https://github.com/mono/SkiaSharp).
 
 <img src="../assets/img/kodak.jpg" width="350" alt="Paint Shader"
 style="margin-top: 16px;" />
 
 It looks perfect for any camera data processing, from sending cropped thumbnails to ML/AI to displaying previews in any imaginable way, including any drawn UI around. We will use it for creating that nice combination of Skia SKSL shaders with camera feed.
 
-Along with the app we will discuss you could also see another `SkiaCamera` usage example inside the [DrawnUI Demo app](https://github.com/taublast/DrawnUi.Maui.Demo).
+Along with the app we will discuss you could also see another `SkiaCamera` usage example inside the [DrawnUI Demo app](https://github.com/DrawnUi/DrawnUi.Net.Maui.Demo).
 
 ## Use-Case: Real-Time Camera Effects
 
@@ -176,9 +176,9 @@ Please feel free to contribute your own shaders and any improvements!
 ![Filters Camera on iPad](../assets/img/ipad.jpg){: .left width="300"}
 * [AppStore](https://apps.apple.com/us/app/filters-camera/id6749823005) - install on iPhone and iPad
 * [GooglePlay](https://play.google.com/store/apps/details?id=com.appomobi.drawnui.shaderscam) - Install on Android
-* [SkiaCamera Control](https://github.com/taublast/DrawnUi.Maui.Camera) - The camera preview control used in the app
-* [DrawnUI Demo](https://github.com/taublast/DrawnUi.Maui.Demo) - Another example of using SkiaCamera
-* [DrawnUI for .NET MAUI](https://github.com/taublast/DrawnUi) - The rendering engine powering the camera effects
+* [SkiaCamera Control](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera) - The camera preview control used in the app
+* [DrawnUI Demo](https://github.com/DrawnUi/DrawnUi.Net.Maui.Demo) - Another example of using SkiaCamera
+* [DrawnUI for .NET MAUI](https://github.com/DrawnUi/DrawnUi.Net) - The rendering engine powering the camera effects
 * [FastPopups for .NET MAUI](https://github.com/taublast/FastPopups) - High-performance popup library
 * [SKSL Documentation](https://skia.org/docs/user/sksl/) - Official Skia Shading Language reference
 * [SkiaSharp](https://github.com/mono/SkiaSharp) - The foundation that makes it all possible

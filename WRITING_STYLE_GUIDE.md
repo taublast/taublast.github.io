@@ -26,6 +26,20 @@
 - Prefer: "same league", "comparable", "this closes the gap" backed by concrete implementation details.
 - Avoid profanity or dunking; the point is capability + engineering, not drama.
 
+### No Changelog Framing (set by the author, 2026-08): reader benefit, not library news
+- The reader asks "what useful do I get from this", not "what is new in the library".
+- Never open with what the library gained, why the author wrote the piece, or that a sample repo was added ("this called for a Part II", "since then the library gained…").
+- Open with the reader's own problems — best as a short menu of quoted questions ("My list is huge and eats memory") each answered by a benefit.
+- Library news appears only as the answer to one of those problems; sample apps are pitched by what the reader can watch or do with them.
+
+### Modesty (set by the author, 2026-08): understate, let facts carry the claim
+- No self-praise boosters: "from scratch", "a big feature", "the best part", "much less code" → plain forms: "built", "a new feature", drop the superlative, "less code".
+- No absolute performance promises: "Instant", "with no delay", "for free", "drops to X" → "fast", "quickly", "with no extra code", "was about X".
+- Performance numbers are observations with the device named, in past tense ("on the same phone the worst frame was about 49ms"), never guaranteed outcomes.
+- Prefer precise consequence over drama: "breaks it" → "breaks the layout"; "useless" → "cannot be reused"; "exactly where you cannot afford it" → "the worst possible moment".
+- Negative framings of earlier own work stay neutral: "Part I skipped" → "Part I did not".
+- Modesty tones the wording only — never weaken factual capability claims or technical warnings.
+
 ## Article Structure Patterns
 
 ### Opening Strategy

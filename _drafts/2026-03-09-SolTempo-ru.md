@@ -12,7 +12,7 @@ image: /assets/img/soltempo_git.jpg
 
 Давайте создадим симпатичное приложение, которое будет рисоваться на холстике как Flutter, но писать мы будем на C#  и максимум отвлечемся на синтаксис шейдеров [SKSL](https://skia.org/docs/user/sksl/) от Гугла. Забудем, все, что мы слышали про .NET MAUI и начнем творить на Skia холсте.
 
-В элемент, читай "контрол", [SkiaCamera](https://github.com/taublast/DrawnUi.Maui.Camera) в составе DrawnUI для .NET MAUI недавно приехали улучшения, которые открывают возможности для обработки видео и аудио в реальном времени. Об обработке видео кадров обязательно я расскажу в следующей статье, пока давайте разберёмся со звуком: здесь нам достаточно будет работы контрола в режиме аудио-мониторинга.
+В элемент, читай "контрол", [SkiaCamera](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera) в составе DrawnUI для .NET MAUI недавно приехали улучшения, которые открывают возможности для обработки видео и аудио в реальном времени. Об обработке видео кадров обязательно я расскажу в следующей статье, пока давайте разберёмся со звуком: здесь нам достаточно будет работы контрола в режиме аудио-мониторинга.
 
 *Если взять две октавы подряд, приложение анимирует шейдер достижения с золотыми лучами, поверх двух других шейдеров, имитирующих стекло. Андроид.*
 
@@ -458,7 +458,7 @@ Super.MaxFps = 30;
 * [SolTempo](https://github.com/taublast/SolTempo) — полный исходный код
 * [AppStore](https://apps.apple.com/app/soltempo/id6759321593) — установить приложение на iOS
 * [GooglePlay](https://play.google.com/store/apps/details?id=com.appomobi.soltempo) — установить приложение на Android
-* [DrawnUI for .NET MAUI](https://github.com/taublast/DrawnUi) — движок для рисованного подхода
+* [DrawnUI for .NET MAUI](https://github.com/DrawnUi/DrawnUi.Net) — движок для рисованного подхода
 * [SkiaSharp](https://github.com/mono/SkiaSharp) — базовая библиотека 2D-графики
 * [SKSL documentation](https://skia.org/docs/user/sksl/) — справочник по языку шейдеров Skia
 * [Plugin.Maui.AppRating](https://github.com/FabriBertani/Plugin.Maui.AppRating) — быстрый и простой способ попросить пользователей оценить приложение

@@ -199,7 +199,7 @@ For custom endpoints that expect raw `RGBA8888` data you can still use `TryGetRg
 
 ## Debug The Image
 
-If you need to verify what you are actually sending to AI/ML, you can save one debug frame to the device gallery and inspect it visually. That gives you a simple way to confirm orientation, crop, and scale instead of assuming anything. Just don't forget to enable gallery access for your app, see `SkiaCamera` [control readme](https://github.com/taublast/DrawnUi.Maui.Camera) on how to do that.
+If you need to verify what you are actually sending to AI/ML, you can save one debug frame to the device gallery and inspect it visually. That gives you a simple way to confirm orientation, crop, and scale instead of assuming anything. Just don't forget to enable gallery access for your app, see `SkiaCamera` [control readme](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera) on how to do that.
 
 If your app already uses `TryGetJpeg(...)`, the simplest path is to save that exact JPEG payload:
 
@@ -364,13 +364,13 @@ I hope you find this article useful. If it helps you build something, please let
 ## Links and Resources
 
 - [DetectFaces](https://github.com/taublast/DetectFaces) - sample app with all platforms implemented, source for everything in this article
-- [DrawnUi.Maui.Camera](https://github.com/taublast/DrawnUi.Maui.Camera) - `SkiaCamera` control
+- [DrawnUi.Maui.Camera](https://github.com/DrawnUi/DrawnUi.Net.Maui.Camera) - `SkiaCamera` control
 - [MediaPipe Tasks for .NET MAUI](https://github.com/v-hogood/MediaPipeTasks) - bindings for mobile
 - [AI Captions and Live Video Processing in .NET MAUI](../VideoRecording/) - previous article in this series
 - [MediaPipe Tasks Vision - Android](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker/android) - official Android MediaPipe docs
 - [MediaPipe Tasks Vision - iOS](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker/ios) - official iOS MediaPipe docs
 - [One Euro Filter](https://gery.casiez.net/1euro/) - the adaptive smoothing algorithm used for mask stabilization
-- [DrawnUI for .NET MAUI](https://github.com/taublast/DrawnUi) - the rendering engine behind SkiaCamera
+- [DrawnUI for .NET MAUI](https://github.com/DrawnUi/DrawnUi.Net) - the rendering engine behind SkiaCamera
 - [SkiaSharp](https://github.com/mono/SkiaSharp) - the 2D graphics library this all runs on
 
 ---
