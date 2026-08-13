@@ -20,7 +20,48 @@ So now, 3 more examples: two of them are demonstrated on the web (thanks Blazor)
 
 *DrawnCells demo, written in C#, drawn on a SkiaSharp canvas — the same code compiled for the browser. The MAUI app also includes variant C, which is XAML-only.*
 
-You will find the small cells code (Variant B) in the new [DrawnUI fiddle](https://fiddle.drawnui.net/), where you can play with coding on the SkiaSharp canvas online — everything compiles and renders on the fly in the browser.
+You will find the small cells code (Variant B) in the new <a href="https://fiddle.drawnui.net/" target="_blank" rel="noopener">DrawnUI fiddle</a>, where you can play with coding on the SkiaSharp canvas online — everything compiles and renders on the fly in the browser.
+
+
+## The sample app
+
+The [DrawnCells](https://github.com/taublast/DrawnCells) sample is a small MAUI app made for this article. One button switches between three lists, and an overlay at the bottom shows the live state of the list engine — the window range, the visible rows, the cached picture.
+
+- **A** — a shop grid, two columns, loaded page by page from a mock server, on `SkiaCachedStack`.
+- **B** — a 1000-row contact list on `SkiaCachedStack`.
+- **C** — a banner-card list built in XAML on a plain stack with `MeasureFirst`.
+
+All three use even rows, and all three pass 1000 items, so the built-in window is on and you can watch it work. The web demo at the top of this article is this same app compiled for the browser (variants A and B; the XAML variant C is in the MAUI app only).
+
+Here is the starting point, variant C in short form. A `SkiaScroll` with a `SkiaLayout` inside a `Canvas`. Give the layout your items and a cell template:
+
+```xml
+<draw:Canvas RenderingMode="Accelerated" Gestures="Enabled"
+             HorizontalOptions="Fill" VerticalOptions="Fill">
+
+    <draw:SkiaScroll HorizontalOptions="Fill" VerticalOptions="Fill">
+
+        <draw:SkiaLayout
+            Type="Column"
+            ItemsSource="{Binding Items}"
+            RecyclingTemplate="Enabled"
+            MeasureItemsStrategy="MeasureFirst"
+            Virtualisation="Enabled">
+
+            <draw:SkiaLayout.ItemTemplate>
+                <DataTemplate>
+                    <!-- your cell -->
+                </DataTemplate>
+            </draw:SkiaLayout.ItemTemplate>
+
+        </draw:SkiaLayout>
+    </draw:SkiaScroll>
+</draw:Canvas>
+```
+
+That already recycles. A small set of real cells is created, and cells that leave the screen are reused for the items coming in. It is the drawn equivalent of `CollectionView`, and this exact setup is fine for many apps.
+
+A note on names: `SkiaStack` is simply a `SkiaLayout` with `Type="Column"`. Same control, shorter to write. The XAML above uses the long form.
 
 ## The problem: big data, small screen
 
@@ -118,10 +159,16 @@ Together this gives four everyday cases:
 | Uneven | Few big (feed posts) | `SkiaStack` + `MeasureVisible` | Same as cards; only the measuring changes |
 | Uneven | Many small (chat) | `SkiaCachedStack` | Many cells and uneven heights; it measures visible-first by itself |
 
-Two notes on `SkiaCachedStack`:
+Notes on `SkiaCachedStack`:
 
 - It is not "the faster stack, use it everywhere". With a few big cells per screen it only adds work for no gain.
 - You do not set a measuring mode on it. It always measures visible-first inside, which is also why it handles uneven rows out of the box.
+
+Think of it as a photo of a tall strip of your list. The strip is taller than the screen. The list records it once, then moves that photo up and down as you scroll. No cell is drawn during those frames. When the screen reaches the edge of the photo, a new photo is recorded.
+
+You can check it is working. Turn on the debug string of the layout. It prints `plane [top..bottom] valid=True` when a photo is in use, or `plane none` when there is none and every frame is still drawing cells one by one.
+
+Two properties tune how tall the strip is and how often a new photo is taken — `VirtualisationInflatedRatio` (default `1.0`) and `PlaneRefreshRatio` (default `0.5`). The defaults are good, so leave them for now. How they balance, and how double buffering records the next photo on a background thread.
 
 If your list is short and every item can keep its own view, like MAUI `BindableLayout`, you do not need recycling at all: `MeasureItemsStrategy="MeasureAll"`, `RecyclingTemplate="Disabled"`, and any container (`SkiaStack`, `SkiaRow`, `SkiaLayer`, `SkiaGrid`).
 
@@ -169,56 +216,6 @@ protected override void SetContent(object ctx)
 
 If the item's own properties change later, for example a message becomes "read", override `ContextPropertyChanged` and update only what changed — Part I shows that too.
 
-## The sample app
-
-The [DrawnCells](https://github.com/taublast/DrawnCells) sample is a small MAUI app made for this article. One button switches between three lists, and an overlay at the bottom shows the live state of the list engine — the window range, the visible rows, the cached picture.
-
-- **A** — a shop grid, two columns, loaded page by page from a mock server, on `SkiaCachedStack`.
-- **B** — a 1000-row contact list on `SkiaCachedStack`.
-- **C** — a banner-card list built in XAML on a plain stack with `MeasureFirst`.
-
-All three use even rows, and all three pass 1000 items, so the built-in window is on and you can watch it work. The web demo at the top of this article is this same app compiled for the browser (variants A and B; the XAML variant C is in the MAUI app only).
-
-Here is the starting point, variant C in short form. A `SkiaScroll` with a `SkiaLayout` inside a `Canvas`. Give the layout your items and a cell template:
-
-```xml
-<draw:Canvas RenderingMode="Accelerated" Gestures="Enabled"
-             HorizontalOptions="Fill" VerticalOptions="Fill">
-
-    <draw:SkiaScroll HorizontalOptions="Fill" VerticalOptions="Fill">
-
-        <draw:SkiaLayout
-            Type="Column"
-            ItemsSource="{Binding Items}"
-            RecyclingTemplate="Enabled"
-            MeasureItemsStrategy="MeasureFirst"
-            Virtualisation="Enabled">
-
-            <draw:SkiaLayout.ItemTemplate>
-                <DataTemplate>
-                    <!-- your cell -->
-                </DataTemplate>
-            </draw:SkiaLayout.ItemTemplate>
-
-        </draw:SkiaLayout>
-    </draw:SkiaScroll>
-</draw:Canvas>
-```
-
-That already recycles. A small set of real cells is created, and cells that leave the screen are reused for the items coming in. It is the drawn equivalent of `CollectionView`, and this exact setup is fine for many apps.
-
-A note on names: `SkiaStack` is simply a `SkiaLayout` with `Type="Column"`. Same control, shorter to write. The XAML above uses the long form.
-
-## What that one cached picture really is
-
-`SkiaCachedStack` draws "one picture instead of twenty". Here is the short version of what that picture is.
-
-Think of it as a photo of a tall strip of your list. The strip is taller than the screen. The list records it once, then moves that photo up and down as you scroll. No cell is drawn during those frames. When the screen reaches the edge of the photo, a new photo is recorded.
-
-You can check it is working. Turn on the debug string of the layout. It prints `plane [top..bottom] valid=True` when a photo is in use, or `plane none` when there is none and every frame is still drawing cells one by one.
-
-Two properties tune how tall the strip is and how often a new photo is taken — `VirtualisationInflatedRatio` (default `1.0`) and `PlaneRefreshRatio` (default `0.5`). The defaults are good, so leave them for now. How they balance, and how double buffering records the next photo on a background thread, deserves its own part — coming later.
-
 ## Summarizing
 
 | Question | Answer |
@@ -235,6 +232,7 @@ If any of these other questions is yours, the answer is below:
 - **"My data lives on a server and never ends."** Show it through a window of a few hundred items — the app never holds the rest. A ready class for that, `WindowedSource<T>`, plus the wiring.
 - **"Which setup do I pick?"** Even or uneven rows, few big cards or many small rows — two questions place any list, including `MeasureFirst` which Part I left out.
 
+
 ## What's next
 
 A new part about grouping, reordering cells and more might follow — depends on your feedback!
@@ -248,7 +246,7 @@ Meanwhile — clone the samples, scroll them on your own phone, and try the wind
 - [Drawn Chat List](https://github.com/taublast/DrawnChatList) sample repo
 - [DrawnUI Docs](https://drawnui.net/)
 - [DrawnUI Repo](https://github.com/DrawnUi/DrawnUi.Net)
-- [DrawnUI Fiddle](https://fiddle.drawnui.net/) to play with cells code online in browser, and much more.
+- <a href="https://fiddle.drawnui.net/" target="_blank" rel="noopener">DrawnUI Fiddle</a> to play with cells code online in browser, and much more.
 
 ---
 
