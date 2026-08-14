@@ -16,7 +16,7 @@ Previously we showed a hybrid recycling for chat: the adapter wasn't recycling c
 
 So now, 3 more examples: two of them are demonstrated on the web (thanks Blazor), all three available in MAUI. Sample app, [DrawnCells](https://github.com/taublast/DrawnCells): three lists — a shop grid, a contact list, a banner-card list — with a live overlay at the bottom, so you can watch the list engine work while you scroll. Try it right here — scroll, and switch between the lists with the button:
 
-<div style="width:100%; max-width:430px; max-height:800px; aspect-ratio: 430 / 800; margin:0 auto;">
+<div style="width:100%; max-width:370px; max-height:600px; aspect-ratio: 370 / 700; margin:0 auto;">
   <iframe src="https://taublast.github.io/DrawnCells/" title="DrawnCells demo" sandbox="allow-scripts allow-same-origin" referrerpolicy="strict-origin" style="width:100%; height:100%; border:0;" loading="lazy"></iframe>
 </div>
 
