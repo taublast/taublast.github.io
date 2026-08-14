@@ -1,0 +1,11 @@
+User-agent: *
+
+Disallow: /norobots/
+
+# Blazor WASM samples embedded as iframes in posts (e.g. RecycledCells part II embeds
+# /DrawnCells/). Crawlers must not download the multi-MB .NET runtime + assemblies —
+# it stalls Google's renderer and can fail indexing of the embedding post. The posts'
+# text is the indexable content; the sample apps are for humans.
+Disallow: /DrawnCells/_framework/
+
+Sitemap: https://taublast.github.io/sitemap.xml
