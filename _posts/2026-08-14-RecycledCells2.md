@@ -8,9 +8,11 @@ tags: [drawnui, maui, collectionview, virtualization, lists, performance, window
 image: /assets/img/cells4.jpg
 ---
 
-In the [first part](/posts/RecycledCells/) we built two drawn lists — a news feed and a chat. After a month I felt more examples could be provided to demonstrate how to create cross-platform recycled drawn lists. Also, while writing this part, I added some more optimizations to the recycling engine.
+In the [first part](/posts/RecycledCells/) we built two drawn lists — a news feed and a chat, both with uneven rows. After a month I felt more examples with even rows could be provided to demonstrate how to create cross-platform recycled drawn lists. Also, while writing this part, I added some more optimizations to the recycling engine.
 
 Previously we showed a hybrid recycling for chat: the adapter wasn't recycling cells, but the page itself was, by reusing the same cells for new chunks of data. In the following three examples we have `RecyclingTemplate="Enabled"` everywhere for a more standard approach.
+
+## The sample app
 
 So now, 3 more examples: two of them are demonstrated on the web (thanks Blazor), all three available in MAUI. Sample app, [DrawnCells](https://github.com/taublast/DrawnCells): three lists — a shop grid, a contact list, a banner-card list — with a live overlay at the bottom, so you can watch the list engine work while you scroll. Try it right here — scroll, and switch between the lists with the button:
 
@@ -22,16 +24,13 @@ So now, 3 more examples: two of them are demonstrated on the web (thanks Blazor)
 
 You will find the small cells code (Variant B) in the new <a href="https://fiddle.drawnui.net/" target="_blank" rel="noopener">DrawnUI fiddle</a>, where you can play with coding on the SkiaSharp canvas online — everything compiles and renders on the fly in the browser.
 
-
-## The sample app
-
 The [DrawnCells](https://github.com/taublast/DrawnCells) sample is a small MAUI app made for this article. One button switches between three lists, and an overlay at the bottom shows the live state of the list engine — the window range, the visible rows, the cached picture.
 
-- **A** — a shop grid, two columns, loaded page by page from a mock server, on `SkiaCachedStack`.
+- **A** — a shop-like grid, two columns, loaded page by page from a mock server, on `SkiaCachedStack`.
 - **B** — a 1000-row contact list on `SkiaCachedStack`.
 - **C** — a banner-card list built in XAML on a plain stack with `MeasureFirst`.
 
-All three use even rows, and all three pass 1000 items, so the built-in window is on and you can watch it work. The web demo at the top of this article is this same app compiled for the browser (variants A and B; the XAML variant C is in the MAUI app only).
+All three examples use even rows, and all three pass 1000 items, so the built-in window is on and you can watch it work. The web demo at the top of this article is this same app compiled for the browser (variants A and B; the XAML variant C is in the MAUI app only).
 
 Here is the starting point, variant C in short form. A `SkiaScroll` with a `SkiaLayout` inside a `Canvas`. Give the layout your items and a cell template:
 
@@ -63,9 +62,53 @@ That already recycles. A small set of real cells is created, and cells that leav
 
 A note on names: `SkiaStack` is simply a `SkiaLayout` with `Type="Column"`. Same control, shorter to write. The XAML above uses the long form.
 
-## The problem: big data, small screen
+`MeasureItemsStrategy="MeasureFirst"` enables fast measuring for even rows. 
 
-Your list has a million rows. Or your chat loads from a server that never ends. You cannot put all of it on screen. You cannot even keep all of it in memory. So you show a small part, and you slide that part as the user scrolls.
+I will touch breifly some details about implementations of variants A, B and C, then cover the used recycing mecanics in general. 
+
+## A — shop grid, two columns
+
+Multi-column is one property on the stack: `Split="2"`. The layout places items two per row; with `Split` you can turn any templated list into a grid.
+
+```csharp
+Content = new SkiaCachedStack
+{
+    Split = 2,                       // two columns
+    ItemsSource = vm.Items,
+    ItemTemplate = CreateProductCellTemplate(),
+    Spacing = 10,
+    Padding = new Thickness(10, 12),
+}
+```
+
+The data comes page by page from a mock server: `LoadMoreCommand` fetches the next page at the list end, pull-to-refresh (`RefreshEnabled` + `RefreshCommand`) reloads page one, and a footer shows a spinner while a page is loading. One detail matters for `Split`: append pages with `ObservableRangeCollection.AddRange`, one collection event per page. Appending items one by one into a split layout stacks single-item rows — the "all rows became one column" surprise.
+
+Each product card also has a tappable heart, to mimic adding and removing from favorites or cart. It does not touch the cell — it toggles the boolean bindable property `IsFav` on the item model, and the cell repaints from data. This way the state survives recycling: scroll away and back, the heart is still red.
+
+## B — contact list, small rows
+
+Many small rows visible at once — the `SkiaCachedStack` case: it records all visible cells into one cached picture and draws that single picture while you scroll, instead of twenty separate cells per frame.
+
+The cell fills itself with a compiled, typed observer — no string property names, and it re-fires when the recycled cell receives a new item:
+
+```csharp
+.ObserveBindingContext<SkiaLayout, ContactItem>((me, item, prop) =>
+{
+    initials.Text = item.Initials;
+    title.Text = item.Name;
+    subtitle.Text = item.Subtitle;
+});
+```
+
+Rows play a ripple when tapped — one property on the cell root, `AnimationTapped = SkiaTouchAnimation.Ripple`.
+
+## C — banner cards in XAML
+
+The XAML variant from the starting point above, with a `FastCell : SkiaDynamicDrawnCell` filling tagged children in `SetContent` — the Part I approach. Two extras worth noting: every card hosts a `SkiaDrawer`, so you can swipe the card content aside, and the banner images load lazily per visible cell (`LoadSourceOnFirstDraw`), so scrolling does not burst fifty downloads at once.
+
+## Big data on a small screen
+
+Maybe your list has a million rows. Or your chat loads from a server that never ends. You cannot put all of it on screen and You cannot even keep all of it in memory. So you show a small part, and you slide that part as the user scrolls.
 
 In Part I the chat did this by hand. It kept about 150 messages, loaded more when the user reached an edge, and dropped items from the other side. It worked. But every app with a big list would have to write that same code again.
 
@@ -78,9 +121,9 @@ The built-in window first.
 
 ## Let the list limit itself
 
-A DrawnUI list can now keep a small *window* of items near the screen and slide that window over your data. Items far from the screen get no cells, no measuring, no memory.
+A DrawnUI received an enhancement, the recycled views adapter along with the stack keep a small *window* of items near the screen and slide that window over your data. Items far from the screen get no cells, no measuring, no memory.
 
-You do not even switch it on. When your list grows past `WindowSourceThreshold` items (**300 by default**), the window turns on by itself. If you want it on from the first item, set one flag:
+You do not need to do anything, when your list grows past `WindowSourceThreshold` items (**300 by default**), the window turns on by itself. In case you want it on from the first item, set one flag:
 
 ```csharp
 new ChatMessagesStack
@@ -180,22 +223,6 @@ MainThread.BeginInvokeOnMainThread(() => Items.AddRange(next));  // append, don'
 
 Once the collection grows past the threshold, the built-in window starts limiting it, with no extra code.
 
-## Why the fast chat turns recycling off
-
-Back to where we started. The chat sample sets `RecyclingTemplate="Disabled"`, in a sample that is all about scroll speed. It was already set this way in Part I — we just never explained why. Here it is.
-
-Recycling has one job: limit how many cell views exist. But the window already limits that. And drawn cells are not native views. A parked drawn cell is a small object holding its measured size and a cached picture. Keeping one cell per item in the window is cheap.
-
-Recycling is not free. Every reused cell has to bind to its new item, measure again (rows are uneven, so the old height cannot be reused), and record its cache again. In a chat with photos, all this work lands in the middle of scrolling — the worst possible moment. On a weak 60Hz test phone that produced a worst frame of about 225ms. With recycling off, that work does not happen during the scroll, and on the same phone the worst frame was about 49ms.
-
-So for a windowed chat: recycling off, one view per item in the window, and a cell pool a little larger than the window plus one incoming page:
-
-```csharp
-ItemTemplatePoolSize = MaxItemsInMemory + LoadBatch + 5   // window + one page + a little extra
-```
-
-If the pool is too small, cells start taking each other's views while scrolling, and you see flickering and lag.
-
 ## The cell: code, not bindings
 
 Part I [covered this in detail](/posts/RecycledCells/#build-one-cell-for-all-content-types): subclass `SkiaDynamicDrawnCell` and fill the cell in code inside `SetContent`, instead of putting a `{Binding}` on every label. A recycled cell changes its item all the time, and one plain-code update beats a burst of separate binding updates in the middle of a scroll. A short reminder of the shape:
@@ -232,12 +259,11 @@ If any of these other questions is yours, the answer is below:
 - **"My data lives on a server and never ends."** Show it through a window of a few hundred items — the app never holds the rest. A ready class for that, `WindowedSource<T>`, plus the wiring.
 - **"Which setup do I pick?"** Even or uneven rows, few big cards or many small rows — two questions place any list, including `MeasureFirst` which Part I left out.
 
-
 ## What's next
 
 A new part about grouping, reordering cells and more might follow — depends on your feedback!
 
-Meanwhile — clone the samples, scroll them on your own phone, and try the window on your own list. If something scrolls badly, or the docs leave you guessing, tell me in the comments or open an issue.
+Meanwhile — clone the samples, scroll them on your own phone, and try the window on your own list. If something scrolls badly, or the docs leave you guessing, please tell me in the comments.
 
 ## Links and Resources
 
