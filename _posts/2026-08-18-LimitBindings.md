@@ -5,7 +5,7 @@ description: "Limit .NET MAUI bindings update, while keeping incoming data at fu
 date: 2026-08-18 08:00:00 +0000
 categories: [MAUI]
 tags: [dotnetmaui, mvvm, performance, binding, sensors, throttling]
-image: /assets/img/limrate.jpg
+image: /assets/img/limi2.jpg
 ---
 
 This post came out from a real app case I had, Racebox, where a Bluetooth device was sending data 20 times per second. The UI was mostly defined in XAML and updated from bindings on the UI thread. And you might guess when data started arriving at that rate the app interactions stopped being smooth. Visually you would not tell until trying to swipe, animate, navigate and similar. The UI thread was a little to busy, and that was visible to users.
