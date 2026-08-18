@@ -8,7 +8,9 @@ tags: [dotnetmaui, mvvm, performance, binding, sensors, throttling]
 image: /assets/img/limi2.jpg
 ---
 
-This post came out from a real app case I had, Racebox, where a Bluetooth device was sending data 20 times per second. The UI was mostly defined in XAML and updated from bindings on the UI thread. And you might guess when data started arriving at that rate the app interactions stopped being smooth. Visually you would not tell until trying to swipe, animate, navigate and similar. The UI thread was a little to busy, and that was visible to users: must admit that I was not noticing this much until I started testing this scenario on some mid-low range Android devices.
+This post came out from a real app case I had, Racebox, where a Bluetooth device was sending data 20 times per second. The UI was mostly defined in XAML and updated from bindings on the UI thread.  
+
+As you might guess when data started arriving at that rate the app interactions stopped being smooth. Visually you would not tell until trying to swipe, animate, navigate and similar. The UI thread was a little to busy, and that was visible to users: must admit that I was not noticing this much until I started testing this scenario on some mid-low range Android devices!
 
 To fix this, I decided to cut the frequency of UI updates from bindings, while still keeping data processing at full speed. The obvious solution seemed to be to cut how often the bindings raise the `PropertyChanged` event.
 
