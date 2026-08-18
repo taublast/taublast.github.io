@@ -8,9 +8,9 @@ tags: [dotnetmaui, mvvm, performance, binding, sensors, throttling]
 image: /assets/img/limi2.jpg
 ---
 
-This post came out from a real app case I had, Racebox, where a Bluetooth device was sending data 20 times per second. The UI was mostly defined in XAML and updated from bindings on the UI thread. And you might guess when data started arriving at that rate the app interactions stopped being smooth. Visually you would not tell until trying to swipe, animate, navigate and similar. The UI thread was a little to busy, and that was visible to users.
+This post came out from a real app case I had, Racebox, where a Bluetooth device was sending data 20 times per second. The UI was mostly defined in XAML and updated from bindings on the UI thread. And you might guess when data started arriving at that rate the app interactions stopped being smooth. Visually you would not tell until trying to swipe, animate, navigate and similar. The UI thread was a little to busy, and that was visible to users: must admit that I was not noticing this much until I started testing this scenario on some mid-low range Android devices.
 
-So I decided to cut the frequency of UI updates, while still keeping data processing at full speed. The obvious solution seemed to be to cut how often the bindings raise the `PropertyChanged` event.
+To fix this, I decided to cut the frequency of UI updates from bindings, while still keeping data processing at full speed. The obvious solution seemed to be to cut how often the bindings raise the `PropertyChanged` event.
 
 First I limited it to 10Hz, but displayed float numbers like "1.234" did not change the figures after the dot fast enough for a nice dynamic effect. So I found 12Hz to be the best rate for such a case: limited updates, and still looking very dynamic.
 
@@ -40,12 +40,12 @@ For example, in a usual ViewModel a property could be defined like this:
          if (_lastMeasureResultCode != value)
          {
              _lastMeasureResultCode = value;
-             OnPropertyChanged(); // trigger bindings propagation
+             OnPropertyChanged(); // triggers event and bindings propagation
          }
      }
  }
 ```
-That `OnPropertyChanged` would trigger our UI bindings which we would want to limit. So we would replace `OnPropertyChanged` with a nice `SmartOnPropertyChanged` and go from here, note we are now inside our custom viewmodel:
+That `OnPropertyChanged` would kick in our UI bindings which we would want to limit. So we would replace `OnPropertyChanged` with a nice `SmartOnPropertyChanged` and go from here, sitting inside our custom ViewModel:
 
 ```csharp
  [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -63,9 +63,9 @@ That `OnPropertyChanged` would trigger our UI bindings which we would want to li
      HashSet<string> RaiseProperties = new HashSet<string>();
 ```
 
-So the setter would no longer touch the UI. It only writes the property *name* into a set, and returns. The set also removes duplicates for us: if speed changes twenty times before the next flush, `RaiseProperties` still holds one entry, `"DisplaySpeed"`.
+Now the setter would no longer touch the UI, it only writes the property *name* into a set, and returns. The set also removes duplicates for us: if speed changes twenty times before the next flush, `RaiseProperties` still holds one entry, `"DisplaySpeed"`.
 
-Two things are still missing: something must decide *when* to empty that set, and something must raise the events without holding the lock. Here is the flow first, and the whole class right after.
+Now something must decide *when* to empty that set, and something must raise the events without holding the lock. Here is the flow first, and the whole class right after.
 
 ## The ViewModel
 
